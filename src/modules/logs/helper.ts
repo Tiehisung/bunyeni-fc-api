@@ -1,11 +1,10 @@
 // import { auth } from "@/auth";
 
 import { ELogSeverity, ILog } from "../../types/log.interface";
-import connectDB from "../../config/db";
 import LogModel from "./logs.model";
 import { getMe } from "../users/user.controller";
 
-connectDB();
+ 
 export async function logAction({
     title,
     description,
