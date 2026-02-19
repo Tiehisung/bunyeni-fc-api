@@ -154,7 +154,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this
 JWT_EXPIRES_IN=7d
 
 # CORS
-ALLOWED_ORIGINS=http://localhost:3000,https://your-frontend.vercel.app
+ALLOWED_ORIGINS=http://localhost:3000,https://bunyeni-fc-api.vercel.app/
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
@@ -177,7 +177,7 @@ vercel --prod
 Base URL
 Development: http://localhost:5000/api
 
-Production: https://your-api.vercel.app/api
+Production: https://bunyeni-fc-api.vercel.app/api
 
 Health Check
 http

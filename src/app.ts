@@ -38,7 +38,6 @@ import metricRoutes from './modules/metrics/metrics.routes';
 import authRoutes from './modules/auth/auth.routes';
 import { requestLogger } from './shared/middleware/logger.middleware';
 import { notFound, errorHandler } from './shared/middleware/error-handler.middleware';
-// import clubRoutes from './modules/clubs/club.routes';
 
 // Import middleware
 
@@ -53,7 +52,7 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173',],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', process.env.FRONTEND_URL || 'https://.vercel.app/'],
     credentials: true,
     optionsSuccessStatus: 200
 };
