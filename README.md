@@ -291,24 +291,7 @@ bunyeni-fc-api/
 👮 Authentication & Authorization
 The API uses JWT (JSON Web Tokens) for authentication and implements Role-Based Access Control (RBAC) with the following roles:
 
-typescript
-enum EUserRole {
-  SUPER_ADMIN = 'super_admin',  // Full system access
-  ADMIN = 'admin',               // Administrative access
-  MANAGER = 'manager',           // Team management
-  COACH = 'coach',                // Coaching staff
-  ASSISTANT_COACH = 'assistant_coach',
-  PLAYER = 'player',              // Player access (limited)
-  GUEST = 'guest',                 // Read-only access
-  JOURNALIST = 'journalist',       // News management
-  EDITOR = 'editor',               // Content editing
-  FINANCE_MANAGER = 'finance_manager',
-  FINANCE_STAFF = 'finance_staff',
-  HR_MANAGER = 'hr_manager',
-  ANALYST = 'analyst',             // Statistics access
-  SPONSORSHIP_MANAGER = 'sponsorship_manager',
-  REFEREE = 'referee'              // Match official
-}
+ 
 Authentication Flow
 Login: POST /api/auth/login with email/password
 
