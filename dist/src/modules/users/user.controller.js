@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleUserStatus = exports.changeUserPassword = exports.deleteUserBySlugOrId = exports.patchUserBySlugOrId = exports.updateUserBySlugOrId = exports.getUserBySlugOrId = exports.createUser = exports.getUsers = exports.getMe = void 0;
+exports.toggleUserStatus = exports.changeUserPassword = exports.deleteUserBySlugOrId = exports.patchUserBySlugOrId = exports.updateUserBySlugOrId = exports.getUserBySlugOrId = exports.getUsers = exports.getMe = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const lib_1 = require("../../lib");
 const user_model_1 = __importDefault(require("./user.model"));
@@ -67,48 +67,6 @@ const getUsers = async (req, res) => {
     }
 };
 exports.getUsers = getUsers;
-// POST /api/users
-const createUser = async (req, res) => {
-    try {
-        const salt = await bcryptjs_1.default.genSalt(10);
-        const { email, password, image, name, role } = req.body;
-        const hashedPass = await bcryptjs_1.default.hash(password, salt);
-        const alreadyExists = await user_model_1.default.findOne({ email });
-        if (alreadyExists) {
-            return res.status(409).json({
-                success: false,
-                message: `User with email ${email} already exists`,
-            });
-        }
-        const user = await user_model_1.default.create({
-            email,
-            password: hashedPass,
-            image,
-            name,
-            role
-        });
-        // Remove password from response
-        const userResponse = user.toObject();
-        delete userResponse.password;
-        // Log
-        await (0, helper_1.logAction)({
-            title: `User [${name}] added.`,
-            description: `User added - ${name}`,
-        });
-        res.status(201).json({
-            success: true,
-            message: "New user created",
-            data: userResponse,
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            success: false,
-            message: (0, lib_1.getErrorMessage)(error, "Failed to create user"),
-        });
-    }
-};
-exports.createUser = createUser;
 // controllers/user.controller.ts (Add these to your existing user controller)
 // GET /api/users/:userId
 const getUserBySlugOrId = async (req, res) => {
@@ -244,10 +202,10 @@ exports.patchUserBySlugOrId = patchUserBySlugOrId;
 // DELETE /api/users/:userId
 const deleteUserBySlugOrId = async (req, res) => {
     try {
-        const userId = req.params.slug;
-        const slug = (0, slug_1.slugIdFilters)(userId);
+        const slug = req.params.slug;
+        const filter = (0, slug_1.slugIdFilters)(slug);
         // Check if user exists
-        const userToDelete = await user_model_1.default.findOne(slug);
+        const userToDelete = await user_model_1.default.findOne(filter);
         if (!userToDelete) {
             return res.status(404).json({
                 success: false,
@@ -269,11 +227,11 @@ const deleteUserBySlugOrId = async (req, res) => {
             });
         }
         // Delete the user
-        const deleted = await user_model_1.default.findOneAndDelete(slug);
+        const deleted = await user_model_1.default.findOneAndDelete(filter).select("-password");
         // Archive the deleted user
         await (0, helper_2.saveToArchive)({
             data: deleted,
-            originalId: userId,
+            originalId: slug,
             sourceCollection: archive_interface_1.EArchivesCollection.USERS,
             reason: 'User deleted',
         });

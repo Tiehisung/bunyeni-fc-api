@@ -71,58 +71,6 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-
-
-// POST /api/users
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const { email, password, image, name, role } = req.body;
-
-    const hashedPass = await bcrypt.hash(password, salt);
-
-    const alreadyExists = await UserModel.findOne({ email });
-    if (alreadyExists) {
-      return res.status(409).json({
-        success: false,
-        message: `User with email ${email} already exists`,
-      });
-    }
-
-    const user = await UserModel.create({
-      email,
-      password: hashedPass,
-      image,
-      name,
-      role
-    });
-
-    // Remove password from response
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    // Log
-    await logAction({
-      title: `User [${name}] added.`,
-      description: `User added - ${name}`,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "New user created",
-      data: userResponse,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: getErrorMessage(error, "Failed to create user"),
-    });
-  }
-};
-
-
-
-
 // controllers/user.controller.ts (Add these to your existing user controller)
 
 // GET /api/users/:userId
@@ -286,11 +234,11 @@ export const patchUserBySlugOrId = async (req: Request, res: Response) => {
 // DELETE /api/users/:userId
 export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
   try {
-    const userId = req.params.slug as string;
-    const slug = slugIdFilters(userId);
+    const slug = req.params.slug as string;
+    const filter = slugIdFilters(slug);
 
     // Check if user exists
-    const userToDelete = await UserModel.findOne(slug);
+    const userToDelete = await UserModel.findOne(filter);
     if (!userToDelete) {
       return res.status(404).json({
         success: false,
@@ -315,12 +263,12 @@ export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
     }
 
     // Delete the user
-    const deleted = await UserModel.findOneAndDelete(slug);
+    const deleted = await UserModel.findOneAndDelete(filter).select("-password");
 
     // Archive the deleted user
     await saveToArchive({
       data: deleted,
-      originalId: userId,
+      originalId: slug,
       sourceCollection: EArchivesCollection.USERS,
       reason: 'User deleted',
     });

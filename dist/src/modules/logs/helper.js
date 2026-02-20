@@ -6,9 +6,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logAction = logAction;
 const log_interface_1 = require("../../types/log.interface");
-const db_1 = __importDefault(require("../../config/db"));
 const logs_model_1 = __importDefault(require("./logs.model"));
-(0, db_1.default)();
 async function logAction({ title, description, severity = log_interface_1.ELogSeverity.INFO, meta = {}, }) {
     try {
         // const me = await getMe()

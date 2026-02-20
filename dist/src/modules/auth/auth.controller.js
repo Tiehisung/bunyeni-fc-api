@@ -3,35 +3,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.register = void 0;
+exports.login = exports.signup = void 0;
 const generateToken_1 = __importDefault(require("../../utils/generateToken"));
 const user_model_1 = __importDefault(require("../users/user.model"));
 const hasher_1 = require("../../utils/hasher");
-const register = async (req, res) => {
+const lib_1 = require("../../lib");
+const helper_1 = require("../logs/helper");
+const signup = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
-        const exists = await user_model_1.default.findOne({ email });
-        if (exists)
-            return res.status(400).json({ message: "User already exists", success: false });
-        const hashedPassword = await (0, hasher_1.hasher)(password);
+        const { email, password, image, name, role } = req.body;
+        const hashedPass = await (0, hasher_1.hasher)(password);
+        const alreadyExists = await user_model_1.default.findOne({ email });
+        if (alreadyExists) {
+            return res.status(409).json({
+                success: false,
+                message: `User with email ${email} already exists`,
+            });
+        }
         const user = await user_model_1.default.create({
-            name,
             email,
-            password: hashedPassword,
+            password: hashedPass,
+            image,
+            name,
             role
         });
+        // Remove password from response
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        // Log
+        await (0, helper_1.logAction)({
+            title: `User [${name}] added.`,
+            description: `User added - ${name}`,
+        });
         res.status(201).json({
-            token: (0, generateToken_1.default)(user._id.toString()),
-            user,
             success: true,
-            message: 'User registered successfully'
+            message: "New user created",
+            data: userResponse,
         });
     }
     catch (error) {
-        res.status(500).json({ message: "Server error", success: false });
+        res.status(500).json({
+            success: false,
+            message: (0, lib_1.getErrorMessage)(error, "Failed to create user"),
+        });
     }
 };
-exports.register = register;
+exports.signup = signup;
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;

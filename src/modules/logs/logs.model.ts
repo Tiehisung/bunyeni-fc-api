@@ -23,11 +23,11 @@ const logSchema = new Schema(
       enum: Object.values(ELogSeverity),
     },
 
-    source: {
-      type: String,
-      default: "user",
-      enum: Object.values(EUserRole),
-    },
+    // source: {
+    //   type: String,
+    //   default: EUserRole.GUEST,
+    //   enum: Object.values(EUserRole),
+    // },
 
     meta: { type: mongoose.Schema.Types.Mixed },
 

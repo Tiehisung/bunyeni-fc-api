@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const log_interface_1 = require("../../types/log.interface");
-const user_1 = require("../../types/user");
 const logSchema = new mongoose_1.Schema({
     title: {
         type: String,
@@ -51,11 +50,11 @@ const logSchema = new mongoose_1.Schema({
         default: "info",
         enum: Object.values(log_interface_1.ELogSeverity),
     },
-    source: {
-        type: String,
-        default: "user",
-        enum: Object.values(user_1.EUserRole),
-    },
+    // source: {
+    //   type: String,
+    //   default: EUserRole.GUEST,
+    //   enum: Object.values(EUserRole),
+    // },
     meta: { type: mongoose_1.default.Schema.Types.Mixed },
     url: String,
 }, {

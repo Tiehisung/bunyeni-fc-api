@@ -6,7 +6,6 @@ import {
 
     createPlayer,
 
-    updatePlayer,
     updatePlayerBySlugOrId,
     patchPlayerBySlugOrId,
 

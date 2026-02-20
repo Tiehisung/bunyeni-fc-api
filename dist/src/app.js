@@ -10,10 +10,6 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const compression_1 = __importDefault(require("compression"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-const express_mongo_sanitize_1 = __importDefault(require("express-mongo-sanitize"));
-const dotenv_1 = __importDefault(require("dotenv"));
-// Load environment variables
-dotenv_1.default.config();
 // Import routes
 const user_routes_1 = __importDefault(require("./modules/users/user.routes"));
 const player_routes_1 = __importDefault(require("./modules/players/player.routes"));
@@ -40,7 +36,6 @@ const metrics_routes_1 = __importDefault(require("./modules/metrics/metrics.rout
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
 const logger_middleware_1 = require("./shared/middleware/logger.middleware");
 const error_handler_middleware_1 = require("./shared/middleware/error-handler.middleware");
-// import clubRoutes from './modules/clubs/club.routes';
 // Import middleware
 const app = (0, express_1.default)();
 // ==================== SECURITY MIDDLEWARE ====================
@@ -50,7 +45,7 @@ app.use((0, helmet_1.default)({
 }));
 // CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173',],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.FRONTEND_URL || 'https://bunyenifc.vercel.app'],
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -76,8 +71,6 @@ app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 // Compression - compress all responses - Makes responses FASTER and reduces bandwidth usage
 app.use((0, compression_1.default)());
-// Data sanitization against NoSQL injection
-app.use((0, express_mongo_sanitize_1.default)());
 // ==================== LOGGING ====================
 app.use(logger_middleware_1.requestLogger);
 // ==================== HEALTH CHECK ====================
@@ -98,6 +91,8 @@ app.get('/', (req, res) => {
         health: '/health'
     });
 });
+//Removes /favicon.ico noisy logs.
+// app.get("/favicon.ico", (_, res) => res.status(204).end());
 // ==================== API ROUTES ====================
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/users', user_routes_1.default);
