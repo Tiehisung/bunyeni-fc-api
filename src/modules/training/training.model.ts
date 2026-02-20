@@ -1,6 +1,7 @@
 import { Schema, model, models, } from "mongoose";
 import { IPlayerMini } from "../../types/player.interface";
-import { IUser } from "../users/user.model";
+import { IUser } from "../../types/user";
+ 
 
 const TrainingSessionSchema = new Schema({
     date: { type: Date, required: true, default: Date.now },

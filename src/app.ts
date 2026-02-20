@@ -47,7 +47,7 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.FRONTEND_URL as string ||'https://bunyenifc.vercel.app'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.FRONTEND_URL as string || 'https://bunyenifc.vercel.app'],
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -87,7 +87,7 @@ app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({
         status: 'OK',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
+        uptime: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV || 'development',
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
@@ -108,7 +108,12 @@ app.get('/', (req: Request, res: Response) => {
 // ==================== API ROUTES ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/players', playerRoutes);
+
+//Cold start improvement is massive for serverless. Only import player routes when needed.
+app.use("/api/players", async (req, res, next) => {
+    const routes = (await import("./modules/players/player.routes")).default;
+    return routes(req, res, next);
+});
 app.use('/api/teams', teamRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/goals', goalRoutes);

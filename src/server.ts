@@ -1,4 +1,6 @@
 // src/server.ts
+import dotenv from "dotenv";
+dotenv.config(); // ✅ MUST BE FIRST LINE
 
 import app from './app';
 import connectDB from './config/db';

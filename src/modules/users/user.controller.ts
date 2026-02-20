@@ -9,12 +9,21 @@ import { ELogSeverity } from "../../types/log.interface";
 import { slugIdFilters } from "../../lib/slug";
 import { saveToArchive } from "../archives/helper";
 import { EArchivesCollection } from "../../types/archive.interface";
+import { IAuthUser, } from "../../types/user";
 
-export const getMe = async (req: Request, res: Response) => {
-  res.json({
-    message: "Protected route accessed ✅",
-    user: req.user
-  });
+/**
+ * 
+ *Usage inside controllers:
+
+ *const user = me(req);
+
+ *console.log(user.id);
+*/
+export const getMe = (req: Request): IAuthUser => {
+  if (!("user" in req) || !req.user) {
+    throw new Error("User not authenticated");
+  }
+  return req.user
 };
 
 

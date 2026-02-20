@@ -4,15 +4,8 @@ import { EUserRole } from "../../types/user";
 
 export type UserRole = "player" | "coach" | "admin";
 
-export interface IUser extends Document {
-    name: string;
-    email: string;
-    password: string;
-    role: EUserRole;
-    comparePassword(candidatePassword: string): Promise<boolean>;
-    id: string
-    image?: string
-}
+
+
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
