@@ -43,7 +43,8 @@ const UserSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: Object.values(user_1.EUserRole), default: user_1.EUserRole.PLAYER }
+    role: { type: String, enum: Object.values(user_1.EUserRole), default: user_1.EUserRole.PLAYER },
+    emailVerified: { type: Boolean, default: true }
 }, { timestamps: true });
 // Compare password method
 UserSchema.methods.comparePassword = async function (candidatePassword) {

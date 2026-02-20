@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteLog = exports.cleanupOldLogs = exports.searchLogs = exports.getLogStats = exports.getLogsBySeverity = exports.getLogsByUser = exports.getLogById = exports.getLogs = void 0;
-require("../models/user"); // Ensure user model is registered for population
 const lib_1 = require("../../lib");
 const logs_model_1 = __importDefault(require("./logs.model"));
 const log_interface_1 = require("../../types/log.interface");

@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 let isConnected = false;
 const connectDB = async () => {
+    mongoose_1.default.set("sanitizeFilter", true);
     if (isConnected) {
         console.log('✅ Using existing MongoDB connection');
         return;
@@ -14,7 +15,7 @@ const connectDB = async () => {
     try {
         const mongoURI = process.env.MONGO_URI;
         if (!mongoURI) {
-            throw new Error('MONGODB_URI is not defined');
+            throw new Error('MONGO_URI  is not defined');
         }
         await mongoose_1.default.connect(mongoURI);
         isConnected = true;
