@@ -5,11 +5,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
-
 
 
 // Import routes
@@ -52,7 +47,7 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', process.env.FRONTEND_URL || 'https://.vercel.app/'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.FRONTEND_URL as string ||'https://bunyenifc.vercel.app'],
     credentials: true,
     optionsSuccessStatus: 200
 };

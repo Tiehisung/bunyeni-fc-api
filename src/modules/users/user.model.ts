@@ -18,7 +18,8 @@ const UserSchema = new Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: Object.values(EUserRole), default: EUserRole.PLAYER }
+    role: { type: String, enum: Object.values(EUserRole), default: EUserRole.PLAYER },
+    emailVerified: { type: Boolean, default: true }
 }, { timestamps: true });
 
 // Compare password method

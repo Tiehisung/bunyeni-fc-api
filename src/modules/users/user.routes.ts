@@ -3,7 +3,6 @@ import { Router } from "express";
 import {
     getUsers,
     getUserBySlugOrId,
-    createUser,
     updateUserBySlugOrId,
     patchUserBySlugOrId,
     deleteUserBySlugOrId,
@@ -20,14 +19,12 @@ const router = Router();
 // Apply authentication middleware to all routes (optional - remove if not needed)
 // router.use(authenticate);
 
-router.route("/")
-    .get(getUsers)
-    .post(createUser);
+router.get('/', getUsers)
 
 router.route("/:slug")
     .get(getUserBySlugOrId)
     .put(authenticate, updateUserBySlugOrId)
-    .delete(authenticate, deleteUserBySlugOrId);
+    .delete(deleteUserBySlugOrId);
 
 // Additional user operations
 router.post(

@@ -2,32 +2,55 @@ import type { Request, Response } from "express";
 import generateToken from "../../utils/generateToken";
 import UserModel from "../users/user.model";
 import { hasher } from "../../utils/hasher";
+import { getErrorMessage } from "../../lib";
+import { logAction } from "../logs/helper";
 
-export const register = async (req: Request, res: Response) => {
+
+export const signup = async (req: Request, res: Response) => {
+
     try {
-        const { name, email, password, role } = req.body;
 
-        const exists = await UserModel.findOne({ email });
-        if (exists)
-            return res.status(400).json({ message: "User already exists", success: false });
+        const { email, password, image, name, role } = req.body;
 
-        const hashedPassword = await hasher(password);
+        const hashedPass = await hasher(password)
+
+        const alreadyExists = await UserModel.findOne({ email });
+        if (alreadyExists) {
+            return res.status(409).json({
+                success: false,
+                message: `User with email ${email} already exists`,
+            });
+        }
 
         const user = await UserModel.create({
-            name,
             email,
-            password: hashedPassword,
+            password: hashedPass,
+            image,
+            name,
             role
         });
 
+        // Remove password from response
+        const userResponse = user.toObject();
+        delete userResponse.password;
+
+        // Log
+        await logAction({
+            title: `User [${name}] added.`,
+            description: `User added - ${name}`,
+
+        });
+
         res.status(201).json({
-            token: generateToken(user._id.toString()),
-            user,
             success: true,
-            message: 'User registered successfully'
+            message: "New user created",
+            data: userResponse,
         });
     } catch (error) {
-        res.status(500).json({ message: "Server error", success: false });
+        res.status(500).json({
+            success: false,
+            message: getErrorMessage(error, "Failed to create user"),
+        });
     }
 };
 
