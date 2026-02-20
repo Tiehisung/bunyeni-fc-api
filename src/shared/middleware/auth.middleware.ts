@@ -1,12 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import UserModel, { IUser } from "../../modules/users/user.model";
-import { EUserRole } from "../../types/user";
+
+import { EUserRole, IAuthUser, } from "../../types/user";
 
 declare global {
     namespace Express {
         interface Request {
-            user?: IUser;
+            user?: IAuthUser;
         }
     }
 }
@@ -17,43 +17,27 @@ export const authenticate = async (
     next: NextFunction
 ) => {
     let token;
+    const header = req.headers.authorization;
 
-    if (req.headers.authorization?.startsWith("Bearer")) {
-        token = req.headers.authorization.split(" ")[1];
+    if (!header?.startsWith("Bearer "))
+        return res.status(401).json({ message: "Unauthorized" });
+
+    if (header?.startsWith("Bearer")) {
+        token = header.split(" ")[1];
     }
 
     if (!token)
         return res.status(401).json({ message: "Not authorized" });
 
     try {
+
         const decoded = jwt.verify(
             token,
-            process.env.JWT_SECRET as string
-        ) as { id: string };
+            process.env.JWT_SECRET!
+        ) as IAuthUser;
 
-        // Get user from database
-        const user = await UserModel.findById(decoded.id)
-            .select("-password -__v")
-            .lean();
-
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "User associated with this token no longer exists.",
-                code: "USER_NOT_FOUND"
-            });
-        }
-
-        // Check if user is active
-        if (user.status === 'inactive' || user.status === 'suspended') {
-            return res.status(403).json({
-                success: false,
-                message: `Account is ${user.status}. Please contact administrator.`,
-                code: "ACCOUNT_INACTIVE"
-            });
-        }
-
-        req.user = user
+        // ✅ attach directly (no DB query)
+        req.user = decoded;
 
         next();
     } catch (error) {
@@ -81,8 +65,6 @@ export const authenticate = async (
         });
     }
 };
-
-
 
 
 /**

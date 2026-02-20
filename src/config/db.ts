@@ -1,40 +1,37 @@
 // src/config/db.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-let isConnected = false;
+declare global {
+    // allow global cache in serverless
+    var mongooseConn: {
+        conn: typeof mongoose | null;
+        promise: Promise<typeof mongoose> | null;
+    };
+}
 
-const connectDB = async (): Promise<void> => {
-    mongoose.set("sanitizeFilter", true);
-    if (isConnected) {
-        console.log('✅ Using existing MongoDB connection');
-        return;
+global.mongooseConn ||= {
+    conn: null,
+    promise: null,
+};
+
+const connectDB = async () => {
+    if (global.mongooseConn.conn) {
+        return global.mongooseConn.conn;
     }
 
-    try {
-        const mongoURI = process.env.MONGO_URI as string;
-
-        if (!mongoURI) {
-            throw new Error('MONGO_URI  is not defined');
-        }
-
-        await mongoose.connect(mongoURI);
-        isConnected = true;
-        console.log('✅ MongoDB connected successfully');
-
-        mongoose.connection.on('error', (err) => {
-            console.error('MongoDB connection error:', err);
-            isConnected = false;
-        });
-
-        mongoose.connection.on('disconnected', () => {
-            console.warn('MongoDB disconnected');
-            isConnected = false;
-        });
-
-    } catch (error) {
-        console.error('❌ MongoDB connection error:', error);
-        throw error;
+    if (!global.mongooseConn.promise) {
+        global.mongooseConn.promise = mongoose.connect(
+            process.env.MONGO_URI as string,
+            {
+                bufferCommands: false,
+            }
+        );
     }
+
+    global.mongooseConn.conn = await global.mongooseConn.promise;
+    console.log("✅ Mongo connected (cached)");
+
+    return global.mongooseConn.conn;
 };
 
 export default connectDB;

@@ -12,7 +12,13 @@ export interface IUser {
   createdAt?: string;
   updatedAt?: string;
 }
-
+export interface IAuthUser {
+    name: string;
+    email: string;
+    role: EUserRole;
+    id: string
+    image?: string
+}
 
 export enum EUserRole {
   ADMIN = 'admin',
