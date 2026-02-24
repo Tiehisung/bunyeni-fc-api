@@ -14,9 +14,9 @@ const matchSchema = new Schema(
       default: () => EMatchStatus.UPCOMING,
     },
     goals: [{ type: Schema.Types.ObjectId, ref: "goals" }],
-    squad: { type: Schema.Types.ObjectId, ref: "squad" },
-    cards: { type: Schema.Types.ObjectId, ref: "card" },
-    injuries: { type: Schema.Types.ObjectId, ref: "injury" },
+    squad: [{ type: Schema.Types.ObjectId, ref: "squad" }],
+    cards: [{ type: Schema.Types.ObjectId, ref: "cards" }],
+    injuries: [{ type: Schema.Types.ObjectId, ref: "injury" }],
 
     sponsor: [{ type: Schema.Types.ObjectId, ref: "sponsors" }],
     broadcaster: {},

@@ -28,7 +28,6 @@ const staffSchema = new Schema(
         endDate: { type: String },
         avatar: String,
         galleries: [{ type: Schema.Types.ObjectId }],
-        card: { type: String, default: () => "" },
         medicals: { type: Schema.Types.Array, default: () => [] },
         role: {
             type: String,

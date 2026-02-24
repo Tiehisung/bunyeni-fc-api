@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { removeEmptyKeys } from "../../lib";
 import LogModel from "./logs.model";
 import { ELogSeverity } from "../../types/log.interface";
-import "../users/user.model";// Ensure user model is registered for population
+import '../../shared/models'// Ensure user model is registered for population
 
 // GET /api/logs
 export const getLogs = async (req: Request, res: Response) => {
