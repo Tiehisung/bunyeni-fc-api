@@ -10,7 +10,7 @@ import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { EMatchStatus } from "../../types/match.interface";
 import { saveToArchive } from "../archives/helper";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
 
 //For populating related data, you can import other models as needed
@@ -287,7 +287,7 @@ export const createMatch = async (req: Request, res: Response) => {
         const saved = await MatchModel.create({
             ...formdata,
             slug,
-            createdBy: req.user?.id,
+            // createdBy: req.user?.id,
             createdAt: new Date(),
         });
 
@@ -317,70 +317,6 @@ export const createMatch = async (req: Request, res: Response) => {
     }
 };
 
-// PUT /api/matches/:id
-export const updateMatch = async (req: Request, res: Response) => {
-    try {
-        const slug = req.params.slug as string;
-        const filter = slugIdFilters(slug)
-        const updates = req.body;
-
-        // Remove _id from updates if present
-        delete updates._id;
-
-        // If title or date changed, update slug
-        if (updates.title || updates.date) {
-            const existingMatch = await MatchModel.findOne(filter);
-            if (existingMatch) {
-                const newTitle = updates.title || existingMatch.title;
-                const newDate = updates.date || existingMatch.date;
-                updates.slug = slugify(`${newTitle}-${newDate}`, false);
-            }
-        }
-
-        const updated = await MatchModel.findOneAndUpdate(
-            filter,
-            {
-                $set: {
-                    ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
-                }
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updated) {
-            return res.status(404).json({
-                message: "Match not found",
-                success: false
-            });
-        }
-
-        // Log action
-        await logAction({
-            title: `Match updated - [${updated.title}]`,
-            description: `Match details updated`,
-            meta: {
-                slug: updated._id,
-                updates: Object.keys(updates),
-            },
-        });
-
-        res.status(200).json({
-            message: "Match updated successfully",
-            success: true,
-            data: updated,
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Update failed",
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-        });
-    }
-};
-
-// PATCH /api/matches/:id/status
 export const updateMatchStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -399,7 +335,7 @@ export const updateMatchStatus = async (req: Request, res: Response) => {
                 $set: {
                     status,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 }
             },
             { new: true }
@@ -441,7 +377,7 @@ export const updateMatchResult = async (req: Request, res: Response) => {
                     result,
                     status: EMatchStatus.FT,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 }
             },
             { new: true }
@@ -468,47 +404,7 @@ export const updateMatchResult = async (req: Request, res: Response) => {
     }
 };
 
-// DELETE /api/matches/:id
-export const deleteMatch = async (req: Request, res: Response) => {
-    try {
-        const slug = req.params.slug as string;
-        const filter = slugIdFilters(slug)
-
-        const deleted = await MatchModel.findOneAndDelete(filter);
-
-        if (!deleted) {
-            return res.status(404).json({
-                message: "Match not found",
-                success: false
-            });
-        }
-
-        // Log action
-        await logAction({
-            title: `Match deleted - [${deleted.title}]`,
-            description: `Match was deleted`,
-            severity: ELogSeverity.CRITICAL,
-            meta: {
-                slug: deleted._id,
-                title: deleted.title,
-                date: deleted.date,
-            },
-        });
-
-        res.status(200).json({
-            message: "Match deleted successfully",
-            success: true,
-            data: { id: deleted._id, title: deleted.title },
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Delete failed",
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-        });
-    }
-};
-
+// 
 // GET /api/matches/stats
 export const getMatchStats = async (req: Request, res: Response) => {
     try {
@@ -601,7 +497,7 @@ export const getMatchStats = async (req: Request, res: Response) => {
 // controllers/match.controller.ts (Add these to your existing match controller)
 
 // GET /api/matches/:slug
-export const getMatchBySlugOrId = async (req: Request, res: Response) => {
+export const getMatch = async (req: Request, res: Response) => {
     try {
         const slug = req.params.slug as string;
         const filter = slugIdFilters(slug);
@@ -636,7 +532,7 @@ export const getMatchBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // PUT /api/matches/:slug
-export const updateMatchBySlugOrId = async (req: Request, res: Response) => {
+export const updateMatch = async (req: Request, res: Response) => {
     try {
         const slug = req.params.slug as string;
         const filter = slugIdFilters(slug);
@@ -652,7 +548,7 @@ export const updateMatchBySlugOrId = async (req: Request, res: Response) => {
                 $set: {
                     ...body,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 }
             },
             { new: true, runValidators: true }
@@ -694,7 +590,7 @@ export const updateMatchBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // PATCH /api/matches/:slug (partial updates)
-export const patchMatchBySlugOrId = async (req: Request, res: Response) => {
+export const patchMatch = async (req: Request, res: Response) => {
     try {
         const slug = req.params.slug as string;
         const filter = slugIdFilters(slug);
@@ -716,7 +612,7 @@ export const patchMatchBySlugOrId = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 }
             },
             { new: true, runValidators: true }
@@ -747,7 +643,7 @@ export const patchMatchBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // DELETE /api/matches/:slug
-export const deleteMatchBySlugOrId = async (req: Request, res: Response) => {
+export const deleteMatch = async (req: Request, res: Response) => {
     try {
         const slug = req.params.slug as string;
         const filter = slugIdFilters(slug);
@@ -770,7 +666,7 @@ export const deleteMatchBySlugOrId = async (req: Request, res: Response) => {
                 ...deleted,
                 isLatest: false,
                 deletedAt: new Date(),
-                deletedBy: req.user?.id,
+                // deletedBy: req.user?.id,
             },
             reason: 'Match deleted',
 
@@ -921,7 +817,7 @@ export const setMatchMVP = async (req: Request, res: Response) => {
                 $set: {
                     mvp: playerId,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 }
             },
             { new: true }

@@ -5,7 +5,7 @@ import GalleryModel from "./gallery.model";
 import { IGallery } from "../../../types/file.interface";
 import FileModel from "../files/file.model";
 import { saveToArchive } from "../../archives/helper";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import { ELogSeverity } from "../../../types/log.interface";
 import { EArchivesCollection } from "../../../types/archive.interface";
 
@@ -149,7 +149,7 @@ export const getGalleriesByTag = async (req: Request, res: Response) => {
 // POST /api/galleries
 export const createGallery = async (req: Request, res: Response) => {
     try {
-        const { files, tags, title, description } = req.body as IGallery;
+        const { files, tags, title, description, } = req.body as IGallery;
 
         // Validate input
         if (!files || !Array.isArray(files) || files.length === 0) {
@@ -170,20 +170,20 @@ export const createGallery = async (req: Request, res: Response) => {
             title: title || "Untitled Gallery",
             description: description || "",
             timestamp: Date.now(),
-            createdBy: req.user, // From auth middleware
+            // createdBy: req.user, // From auth middleware
             createdAt: new Date(),
             updatedAt: new Date(),
         });
 
         // Populate files for response
-        const populatedGallery = await GalleryModel.findById(savedGallery._id)
-            .populate("files")
-            .lean();
+        // const populatedGallery = await GalleryModel.findById(savedGallery._id)
+        //     .populate("files")
+        //     .lean();
 
         res.status(201).json({
             message: "Gallery created successfully",
             success: true,
-            data: populatedGallery,
+            data: { ...savedGallery, files: savedFiles },
         });
     } catch (error) {
         res.status(500).json({
@@ -226,7 +226,7 @@ export const updateGallery = async (req: Request, res: Response) => {
                     title: title || existingGallery.title,
                     description: description !== undefined ? description : existingGallery.description,
                     updatedAt: new Date(),
-                    updatedBy: req.user,
+                    // updatedBy: req.user,
                 },
             },
             { new: true, runValidators: true }
@@ -267,7 +267,7 @@ export const patchGallery = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user,
+                    // updatedBy: req.user,
                 },
             },
             { new: true, runValidators: true }
@@ -349,7 +349,7 @@ export const addFilesToGallery = async (req: Request, res: Response) => {
             id,
             {
                 $push: { files: { $each: fileIds } },
-                $set: { updatedAt: new Date(), updatedBy: req.user },
+                // $set: { updatedAt: new Date(), updatedBy: req.user },
             },
             { new: true }
         ).populate("files");
@@ -384,7 +384,7 @@ export const removeFileFromGallery = async (req: Request, res: Response) => {
             id,
             {
                 $pull: { files: fileId },
-                $set: { updatedAt: new Date(), updatedBy: req.user },
+                // $set: { updatedAt: new Date(), updatedBy: req.user },
             },
             { new: true }
         ).populate("files");

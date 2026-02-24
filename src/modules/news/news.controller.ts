@@ -9,7 +9,7 @@ import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { IPostNews } from "../../types/news.interface";
 import ArchiveModel from "../archives/archive.model";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import NewsModel from "./news.model";
 
 // GET /api/news
@@ -85,9 +85,6 @@ export const getNews = async (req: Request, res: Response) => {
     const cleaned = removeEmptyKeys(query);
 
     const news = await NewsModel.find(cleaned)
-      .populate('reporter.id', 'name email avatar')
-      .populate('featuredImage')
-      .populate('gallery')
       .sort({ createdAt: "desc" })
       .skip(skip)
       .limit(limit)
@@ -119,8 +116,6 @@ export const getTrendingNews = async (req: Request, res: Response) => {
     const limit = Number.parseInt(req.query.limit as string || "5", 10);
 
     const news = await NewsModel.find({ "stats.isTrending": true, isPublished: true })
-      .populate('reporter.id', 'name avatar')
-      .populate('featuredImage')
       .sort({ "stats.viewCount": -1, createdAt: -1 })
       .limit(limit)
       .lean();
@@ -143,8 +138,6 @@ export const getLatestNews = async (req: Request, res: Response) => {
     const limit = Number.parseInt(req.query.limit as string || "10", 10);
 
     const news = await NewsModel.find({ isPublished: true })
-      .populate('reporter.id', 'name avatar')
-      .populate('featuredImage')
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
@@ -170,8 +163,6 @@ export const getNewsByCategory = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const news = await NewsModel.find({ category, isPublished: true })
-      .populate('reporter.id', 'name avatar')
-      .populate('featuredImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -204,9 +195,6 @@ export const getNewsBySlug = async (req: Request, res: Response) => {
     const filter = slugIdFilters(slug);
 
     const news = await NewsModel.findOne(filter)
-      .populate('reporter.id', 'name email avatar bio')
-      .populate('featuredImage')
-      .populate('gallery')
       .lean();
 
     if (!news) {
@@ -256,8 +244,8 @@ export const createNews = async (req: Request, res: Response) => {
       details,
       reporter: {
 
-        name: reporter?.name || req.user?.name,
-        avatar: reporter?.avatar || req.user?.image,
+        // name: reporter?.name || req.user?.name,
+        // avatar: reporter?.avatar || req.user?.image,
       },
 
       isPublished: true,
@@ -270,7 +258,7 @@ export const createNews = async (req: Request, res: Response) => {
         isLatest: true,
         hasVideo: !!headline?.hasVideo,
       },
-      createdBy: req.user?.id,
+      // createdBy: req.user?.id,
       createdAt: new Date(),
     });
 
@@ -296,9 +284,7 @@ export const createNews = async (req: Request, res: Response) => {
 
     // Populate for response
     const populatedNews = await NewsModel.findById(published._id)
-      .populate('reporter.id', 'name email avatar')
-      .populate('featuredImage')
-      .populate('gallery')
+
       .lean();
 
     res.status(201).json({
@@ -346,14 +332,11 @@ export const updateNews = async (req: Request, res: Response) => {
         $set: {
           ...body,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
       },
       { new: true, runValidators: true }
     )
-      .populate('reporter.id', 'name email avatar')
-      .populate('featuredImage')
-      .populate('gallery')
       .lean();
 
     if (!updated) {
@@ -403,7 +386,7 @@ export const togglePublishStatus = async (req: Request, res: Response) => {
           isPublished,
           publishedAt: isPublished ? new Date() : null,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
       },
       { new: true }
@@ -517,7 +500,7 @@ export const deleteNews = async (req: Request, res: Response) => {
       originalId: foundNewsItem._id,
       data: { ...foundNewsItem.toObject(), isLatest: false },
       archivedAt: new Date(),
-      archivedBy: req.user?.id,
+      // archivedBy: req.user?.id,
       reason: 'News deleted',
     });
 

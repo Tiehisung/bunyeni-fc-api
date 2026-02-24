@@ -12,7 +12,7 @@ const newsSchema = new Schema(
     },
     source: {
       type: Schema.Types.Mixed,
-      default: "konjiehifc.vercel.app",
+      default: "bunyenifc.vercel.app",
     },
     details: [
       {

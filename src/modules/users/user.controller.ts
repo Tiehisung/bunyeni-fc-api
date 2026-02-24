@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { QueryFilter } from "mongoose";
 import { getErrorMessage, removeEmptyKeys } from "../../lib";
 import UserModel from "./user.model";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import { ELogSeverity } from "../../types/log.interface";
 import { slugIdFilters } from "../../lib/slug";
 import { saveToArchive } from "../archives/helper";

@@ -3,7 +3,7 @@ import generateToken from "../../utils/generateToken";
 import UserModel from "../users/user.model";
 import { hasher } from "../../utils/hasher";
 import { getErrorMessage } from "../../lib";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 
 
 export const signup = async (req: Request, res: Response) => {

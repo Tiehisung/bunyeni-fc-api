@@ -1,10 +1,10 @@
 // controllers/finance/transaction.controller.ts
 import type { Request, Response } from "express";
 import { QueryFilter } from "mongoose";
-import { getFinancialSummary, getClubTransactions } from "..";
+import { getTransactionsSummary, getClubTransactions } from "..";
 import { removeEmptyKeys, getErrorMessage } from "../../../lib";
 import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import { TransactionModel } from "../transaction.model";
 import { TransactionType } from "../types";
 
@@ -72,7 +72,7 @@ export const getTransactions = async (req: Request, res: Response) => {
             .lean();
 
         // Get financial summary for the period
-        const summary = await getFinancialSummary(startDate, endDate);
+        const summary = await getTransactionsSummary(startDate, endDate);
 
         // Get club transactions (additional stats)
         const clubTrans = await getClubTransactions(cleanedQuery);
@@ -106,7 +106,7 @@ export const getTransactionSummary = async (req: Request, res: Response) => {
     try {
         const { startDate, endDate, period = 'month' } = req.query;
 
-        const summary = await getFinancialSummary(
+        const summary = await getTransactionsSummary(
             startDate as string,
             endDate as string,
             // period as string
@@ -341,7 +341,7 @@ export const updateTransaction = async (req: Request, res: Response) => {
         await logAction({
             title: "💰 Transaction Updated",
             description: updates.description || existingTransaction.description,
-            
+
             severity: ELogSeverity.INFO,
             meta: {
                 transactionId: id,

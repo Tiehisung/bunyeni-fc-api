@@ -1,12 +1,12 @@
 // controllers/goal.controller.ts
 import type { Request, Response } from "express";
 import { getErrorMessage } from "../../../lib";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import GoalModel, { IPostGoal } from "./goals.model";
 import { ELogSeverity } from "../../../types/log.interface";
- 
+
 // GET /api/goals
 export const getGoals = async (req: Request, res: Response) => {
   try {

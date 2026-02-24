@@ -84,7 +84,7 @@ export interface IBudget {
 }
 
 // Financial summary interface
-export interface IFinancialSummary {
+export interface ITransactionsSummary {
     totalIncome: number
     totalExpenses: number
     netBalance: number
@@ -105,7 +105,7 @@ export interface IReport {
         startDate: string
         endDate: string
     }
-    summary: IFinancialSummary
+    summary: ITransactionsSummary
     transactions: ITransaction[]
     createdAt: string
     updatedAt: string

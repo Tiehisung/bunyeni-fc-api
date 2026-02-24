@@ -2,19 +2,20 @@
 import { Router } from "express";
 import {
   getMatches,
-  getMatchBySlugOrId,
+  getMatch,
   getUpcomingMatches,
   getRecentMatches,
   getMatchesBySeason,
+  getMatchStats,
+
   createMatch,
+
   updateMatch,
-  updateMatchBySlugOrId,
-  patchMatchBySlugOrId,
+  patchMatch,
   updateMatchStatus,
   updateMatchResult,
   deleteMatch,
-  deleteMatchBySlugOrId,
-  getMatchStats,
+
   addGoalToMatch,
   addCardToMatch,
   addInjuryToMatch,
@@ -37,10 +38,10 @@ router.put("/live", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADM
 
 
 // Slug-based routes (flexible identifier)
-router.get("/:slug", getMatchBySlugOrId);
-router.put("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), updateMatchBySlugOrId);
-router.patch("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), patchMatchBySlugOrId);
-router.delete("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,), deleteMatchBySlugOrId);
+router.get("/:slug", getMatch);
+router.put("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), updateMatch);
+router.patch("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), patchMatch);
+router.delete("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,), deleteMatch);
 
 router.route("/")
   .post(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), createMatch);

@@ -13,7 +13,7 @@ import { formatDate } from "../../lib/timeAndDate";
 import { generatePlayerAbout } from "../../data/about";
 import { EPlayerAgeStatus, EPlayerStatus, IPostPlayer } from "../../types/player.interface";
 import { slugIdFilters } from "../../lib/slug";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import { ELogSeverity } from "../../types/log.interface";
 import ArchiveModel from "../archives/archive.model";
 import "../media/files/file.model";
@@ -176,107 +176,8 @@ export const createPlayer = async (req: Request, res: Response) => {
     }
 };
 
-// PUT /api/players/:id
-export const updatePlayer = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-        const updateData = { ...req.body };
 
-        // If updating name or dob, regenerate slug and code
-        if (updateData.firstName || updateData.lastName || updateData.dob) {
-            const player = await PlayerModel.findById(id);
-            if (player) {
-                const firstName = updateData.firstName || player.firstName;
-                const lastName = updateData.lastName || player.lastName;
-                const dob = updateData.dob || player.dob;
-
-                // Regenerate code if needed
-                if (updateData.firstName || updateData.lastName || updateData.dob) {
-                    let newCode = generatePlayerID(firstName, lastName, dob);
-                    const existingPlayerByCode = await PlayerModel.findOne({
-                        code: newCode,
-                        _id: { $ne: id }
-                    });
-
-                    if (existingPlayerByCode) {
-                        newCode = getInitials([firstName, lastName], 2) + (new Date()).getMilliseconds();
-                    }
-
-                    updateData.code = newCode;
-                }
-
-                // Regenerate slug
-                updateData.slug = slugify(`${firstName}-${lastName}-${updateData.code || player.code}`);
-            }
-        }
-
-        // Update age status if dob changed
-        if (updateData.dob) {
-            updateData.ageStatus = getAge(updateData.dob) < 10 ? EPlayerAgeStatus.JUVENILE : EPlayerAgeStatus.YOUTH;
-        }
-
-        // Update about if not provided but other fields changed
-        if (!updateData.about && (updateData.firstName || updateData.lastName || updateData.position)) {
-            const player = await PlayerModel.findById(id);
-            if (player) {
-                updateData.about = generatePlayerAbout(
-                    updateData.firstName || player.firstName,
-                    updateData.lastName || player.lastName,
-                    updateData.position || player.position
-                );
-            }
-        }
-
-        const cleanedData = removeEmptyKeys(updateData);
-
-        const updatedPlayer = await PlayerModel.findByIdAndUpdate(
-            id,
-            cleanedData,
-            { new: true, runValidators: true }
-        ).populate({
-            path: "galleries",
-            populate: { path: 'files' }
-        });
-
-        if (!updatedPlayer) {
-            return res.status(404).json({
-                success: false,
-                message: "Player not found",
-            });
-        }
-
-        // Update corresponding user if email changed
-        if (updateData.email || updateData.firstName || updateData.lastName || updateData.avatar) {
-            const userUpdateData: any = {};
-
-            if (updateData.email) userUpdateData.email = updateData.email;
-            if (updateData.firstName || updateData.lastName) {
-                userUpdateData.name = `${updateData.lastName || updatedPlayer.lastName} ${updateData.firstName || updatedPlayer.firstName}`;
-            }
-            if (updateData.avatar) userUpdateData.image = updateData.avatar;
-            if (updateData.about) userUpdateData.about = updateData.about;
-
-            if (Object.keys(userUpdateData).length > 0) {
-                await UserModel.findOneAndUpdate(
-                    { email: updatedPlayer.email },
-                    userUpdateData
-                );
-            }
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Player updated successfully",
-            data: updatedPlayer,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: getErrorMessage(error, "Failed to update player"),
-        });
-    }
-};
-export const getPlayerBySlugOrId = async (req: Request, res: Response) => {
+export const getPlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
 
@@ -312,7 +213,7 @@ export const getPlayerBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // PUT /api/players/:playerId - Update only relevant fields at a time
-export const updatePlayerBySlugOrId = async (req: Request, res: Response) => {
+export const updatePlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
 
@@ -375,7 +276,7 @@ export const updatePlayerBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // DELETE /api/players/:playerId
-export const deletePlayerBySlugOrId = async (req: Request, res: Response) => {
+export const deletePlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
         const slug = slugIdFilters(playerId);
@@ -434,7 +335,7 @@ export const deletePlayerBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // PATCH /api/players/:playerId - Partial updates
-export const patchPlayerBySlugOrId = async (req: Request, res: Response) => {
+export const patchPlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
         const slug = slugIdFilters(playerId);

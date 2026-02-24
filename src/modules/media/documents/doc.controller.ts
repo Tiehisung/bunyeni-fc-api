@@ -6,9 +6,9 @@ import { TSearchKey } from "../../../types";
 import { IDocFile } from "../../../types/doc";
 import { ELogSeverity } from "../../../types/log.interface";
 import { deleteCldAssets } from "../files/helper";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import DocModel from "./doc.model";
-import FolderModel, { IPostFolder } from "./folders/folder.model";
+import FolderModel, { IPostFolder } from "./folder.model";
 import { EUserRole } from "../../../types/user";
 
 // ==================== MAIN DOCUMENT CONTROLLERS ====================

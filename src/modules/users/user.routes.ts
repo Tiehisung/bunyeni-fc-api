@@ -4,10 +4,8 @@ import {
     getUsers,
     getUserBySlugOrId,
     updateUserBySlugOrId,
-    patchUserBySlugOrId,
     deleteUserBySlugOrId,
     changeUserPassword,
-    toggleUserStatus,
     getMe
 } from "./user.controller";
 import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
