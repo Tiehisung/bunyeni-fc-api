@@ -3,7 +3,6 @@ import { ECardType } from "../../../types/card.interface";
 
 export const cardSchema = new Schema(
   {
-
     minute: String,
     description: String,
     player: {
