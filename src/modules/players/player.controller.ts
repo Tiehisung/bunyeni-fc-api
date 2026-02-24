@@ -13,7 +13,7 @@ import { formatDate } from "../../lib/timeAndDate";
 import { generatePlayerAbout } from "../../data/about";
 import { EPlayerAgeStatus, EPlayerStatus, IPostPlayer } from "../../types/player.interface";
 import { slugIdFilters } from "../../lib/slug";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import { ELogSeverity } from "../../types/log.interface";
 import ArchiveModel from "../archives/archive.model";
 import "../media/files/file.model";
@@ -176,7 +176,7 @@ export const createPlayer = async (req: Request, res: Response) => {
     }
 };
 
- 
+
 export const getPlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;

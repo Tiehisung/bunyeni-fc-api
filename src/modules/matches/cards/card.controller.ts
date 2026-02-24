@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { getErrorMessage } from "../../../lib";
 import { ECardType, ICard } from "../../../types/card.interface";
 import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import CardModel, { IPostCard } from "./card.model";
@@ -218,7 +218,7 @@ export const createCard = async (req: Request, res: Response) => {
                 success: false
             });
         }
- 
+
 
         // Update Player - add card reference
         await PlayerModel.findByIdAndUpdate(
@@ -227,7 +227,7 @@ export const createCard = async (req: Request, res: Response) => {
         );
 
         // Update Match - add card reference
-        const matchId =   match?._id  
+        const matchId = match?._id
         await MatchModel.findByIdAndUpdate(
             matchId,
             { $push: { cards: savedCard._id } }
@@ -251,7 +251,7 @@ export const createCard = async (req: Request, res: Response) => {
             meta: {
                 cardId: savedCard._id,
                 matchId,
-                playerId:player?._id,
+                playerId: player?._id,
                 type,
                 minute,
             },
@@ -291,7 +291,7 @@ export const updateCard = async (req: Request, res: Response) => {
             },
             { new: true, runValidators: true }
         )
-         
+
 
         if (!updatedCard) {
             return res.status(404).json({
@@ -320,7 +320,7 @@ export const deleteCard = async (req: Request, res: Response) => {
 
         // Find card first to get details
         const cardToDelete = await CardModel.findById(id)
-           
+
 
         if (!cardToDelete) {
             return res.status(404).json({

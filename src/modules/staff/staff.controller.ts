@@ -1,13 +1,13 @@
 // controllers/staffMember.controller.ts
 import type { Request, Response } from "express";
- 
+
 import { QueryFilter } from "mongoose";
 import { removeEmptyKeys, getErrorMessage } from "../../lib";
 import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { saveToArchive } from "../archives/helper";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import StaffModel from "./staff.model";
 
 // GET /api/staff
@@ -264,7 +264,7 @@ export const createStaff = async (req: Request, res: Response) => {
 
     // Populate for response
     const populatedStaff = await StaffModel.findById(saved._id)
-      
+
       .lean();
 
     res.status(201).json({
@@ -492,7 +492,7 @@ export const deleteStaff = async (req: Request, res: Response) => {
       originalId: staffMember._id?.toString(),
       data: { ...staffMember.toObject(), isLatest: false },
       reason: 'Staff deleted',
-       
+
     });
 
     // Log deletion

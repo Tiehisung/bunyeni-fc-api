@@ -10,7 +10,7 @@ import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { EMatchStatus } from "../../types/match.interface";
 import { saveToArchive } from "../archives/helper";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
 
 //For populating related data, you can import other models as needed

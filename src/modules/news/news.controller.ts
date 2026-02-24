@@ -9,7 +9,7 @@ import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { IPostNews } from "../../types/news.interface";
 import ArchiveModel from "../archives/archive.model";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import NewsModel from "./news.model";
 
 // GET /api/news

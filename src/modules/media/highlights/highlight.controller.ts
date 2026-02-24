@@ -2,7 +2,7 @@
 import type { Request, Response } from "express";
 import { removeEmptyKeys, getErrorMessage } from "../../../lib";
 import { formatDate } from "../../../lib/timeAndDate";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import HighlightModel, { IPostHighlight } from "./highlight.model";
 
 

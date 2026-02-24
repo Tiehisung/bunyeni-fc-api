@@ -6,7 +6,7 @@ import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import ArchiveModel from "../archives/archive.model";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import TeamModel from "./team.model";
 import { IPostTeam } from "../../types/team";
 import "../media/files/file.model";

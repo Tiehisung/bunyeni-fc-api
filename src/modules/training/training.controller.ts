@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { removeEmptyKeys, getErrorMessage } from "../../lib";
 import { formatDate } from "../../lib/timeAndDate";
 import { ELogSeverity } from "../../types/log.interface";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import TrainingSessionModel, { IPostTrainingSession } from "./training.model";
 
 // GET /api/training

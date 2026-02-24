@@ -5,7 +5,7 @@ import GalleryModel from "./gallery.model";
 import { IGallery } from "../../../types/file.interface";
 import FileModel from "../files/file.model";
 import { saveToArchive } from "../../archives/helper";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import { ELogSeverity } from "../../../types/log.interface";
 import { EArchivesCollection } from "../../../types/archive.interface";
 

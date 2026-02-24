@@ -5,7 +5,7 @@ import { QueryFilter } from "mongoose";
 import { removeEmptyKeys, getErrorMessage } from "../../lib";
 import { ELogSeverity } from "../../types/log.interface";
 import { IPlayerMini } from "../../types/player.interface";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import PlayerModel from "../players/player.model";
 import FileModel from "../media/files/file.model";
 import CaptaincyModel from "./captain.model";
@@ -257,9 +257,9 @@ export const assignCaptain = async (req: Request, res: Response) => {
         const newCaptain = await CaptaincyModel.create({
             player: {
                 _id: player._id,
-                name: player.name ,
+                name: player.name,
                 number: player.number,
-                
+
             },
             role,
             isActive: true,
@@ -271,7 +271,7 @@ export const assignCaptain = async (req: Request, res: Response) => {
         // Log action
         await logAction({
             title: "👑 Captain Assigned",
-            description: `${player.name } appointed as ${role}`,
+            description: `${player.name} appointed as ${role}`,
             severity: ELogSeverity.INFO,
             meta: {
                 captaincyId: newCaptain._id,

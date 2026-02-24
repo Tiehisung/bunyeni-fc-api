@@ -27,7 +27,7 @@ import trainingRoutes from './modules/training/training.routes';
 import featureRoutes from './modules/features/feature.routes';
 import captaincyRoutes from './modules/captains/captain.routes';
 import staffRoutes from './modules/staff/staff.routes';
-import logRoutes from './modules/logs/logs.routes';
+import logRoutes from './modules/log/logs.routes';
 import archiveRoutes from './modules/archives/archive.route';
 import metricRoutes from './modules/metrics/metrics.routes';
 import authRoutes from './modules/auth/auth.routes';

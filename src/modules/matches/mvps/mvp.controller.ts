@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { getErrorMessage } from "../../../lib";
 import { TSearchKey } from "../../../types";
 import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import MvPModel, { IPostMvp } from "./mpv.model";
@@ -277,7 +277,7 @@ export const createMvp = async (req: Request, res: Response) => {
             title: "🏆 MVP Awarded",
             description: `${typeof player === 'object' ? player.name : 'Player'} declared Man of the Match. ${description || ''}`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 mvpId: savedMVP._id,
                 matchId: match,
@@ -340,7 +340,7 @@ export const updateMvp = async (req: Request, res: Response) => {
             title: "MVP Record Updated",
             description: `MVP record updated for ${updatedMVP.player?.name}`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 mvpId: id,
                 updates: Object.keys(updates),
@@ -398,7 +398,7 @@ export const deleteMvp = async (req: Request, res: Response) => {
             title: "MVP Award Deleted",
             description: `MVP award for ${mvpToDelete.player?.name} deleted`,
             severity: ELogSeverity.CRITICAL,
-            
+
             meta: {
                 mvpId: id,
                 matchId: mvpToDelete.match,

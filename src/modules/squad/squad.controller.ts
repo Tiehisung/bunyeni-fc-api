@@ -5,12 +5,12 @@ import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { saveToArchive } from "../archives/helper";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import MatchModel from "../matches/match.model";
 import PlayerModel from "../players/player.model";
 import SquadModel from "./squad.model";
 import { ISquad } from "../../types/squad.interface";
- 
+
 
 // GET /api/squads
 export const getSquads = async (req: Request, res: Response) => {
@@ -147,7 +147,7 @@ export const getSquadByMatch = async (req: Request, res: Response) => {
 // POST /api/squads
 export const createSquad = async (req: Request, res: Response) => {
     try {
-        const { match, players, assistant, coach, description, formation,   } = req.body as ISquad;
+        const { match, players, assistant, coach, description, formation, } = req.body as ISquad;
 
         // Validate required fields
         if (!match || !players || !players.length) {
@@ -205,7 +205,7 @@ export const createSquad = async (req: Request, res: Response) => {
         // Update player statistics (optional - track squad appearances)
         for (const player of players) {
             await PlayerModel.findByIdAndUpdate(
-                player._id ,
+                player._id,
                 { $inc: { 'stats.squadAppearances': 1 } }
             );
         }
@@ -215,7 +215,7 @@ export const createSquad = async (req: Request, res: Response) => {
             title: "📋 Squad Created",
             description: description || `Squad for ${matchDetails.title} on ${formatDate(matchDetails.date)}`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 squadId: savedSquad._id,
                 matchId: match._id || match,
@@ -282,7 +282,7 @@ export const updateSquad = async (req: Request, res: Response) => {
             title: "📋 Squad Updated",
             description: `Squad for ${updated.title} updated`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 squadId: id,
                 updates: Object.keys(updates),
@@ -470,10 +470,10 @@ export const deleteSquad = async (req: Request, res: Response) => {
         // Archive the squad
         await saveToArchive({
             data: squad,
-            originalId: id+'',
+            originalId: id + '',
             sourceCollection: EArchivesCollection.SQUADS,
             reason: 'Squad deleted',
-            
+
         });
 
         // Log deletion
@@ -481,7 +481,7 @@ export const deleteSquad = async (req: Request, res: Response) => {
             title: "📋 Squad Deleted",
             description: `Squad for ${squad.title} deleted on ${formatDate(new Date().toISOString())}`,
             severity: ELogSeverity.CRITICAL,
-            
+
             meta: {
                 squadId: id,
                 matchId: squad.match,

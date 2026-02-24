@@ -4,7 +4,7 @@ import { QueryFilter } from "mongoose";
 import { getTransactionsSummary, getClubTransactions } from "..";
 import { removeEmptyKeys, getErrorMessage } from "../../../lib";
 import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import { TransactionModel } from "../transaction.model";
 import { TransactionType } from "../types";
 
@@ -341,7 +341,7 @@ export const updateTransaction = async (req: Request, res: Response) => {
         await logAction({
             title: "💰 Transaction Updated",
             description: updates.description || existingTransaction.description,
-            
+
             severity: ELogSeverity.INFO,
             meta: {
                 transactionId: id,

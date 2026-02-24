@@ -4,7 +4,7 @@ import type { Request, Response } from "express";
 import { QueryFilter } from "mongoose";
 import { removeEmptyKeys, getErrorMessage } from "../../lib";
 import { ELogSeverity } from "../../types/log.interface";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import FeatureModel from "./feature.model";
 
 // GET /api/features
@@ -160,7 +160,7 @@ export const createFeature = async (req: Request, res: Response) => {
             title: `🚩 Feature Created - ${name}`,
             description: `New feature created in ${category || 'general'} category`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 featureId: savedFeature._id,
                 name,
@@ -232,7 +232,7 @@ export const updateFeatureById = async (req: Request, res: Response) => {
             title: "🚩 Feature Updated",
             description: `Feature ${updated.name} updated`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 featureId: id,
                 name: updated.name,
@@ -291,7 +291,7 @@ export const updateFeatureByName = async (req: Request, res: Response) => {
             title: "🚩 Feature Updated",
             description: `Feature ${name} updated by ${user?.name || req.user?.name || 'Admin'}`,
             severity: ELogSeverity.INFO,
-            
+
             meta: {
                 featureId: feature._id,
                 name,
@@ -344,7 +344,7 @@ export const toggleFeatureStatus = async (req: Request, res: Response) => {
             title: `🚩 Feature ${isActive ? 'Enabled' : 'Disabled'}`,
             description: `Feature ${feature.name} ${isActive ? 'enabled' : 'disabled'}`,
             severity: isActive ? ELogSeverity.INFO : ELogSeverity.WARNING,
-            
+
             meta: {
                 featureId: id,
                 name: feature.name,
@@ -387,7 +387,7 @@ export const deleteFeatureById = async (req: Request, res: Response) => {
             title: "🚩 Feature Deleted",
             description: `Feature ${feature.name} deleted`,
             severity: ELogSeverity.CRITICAL,
-            
+
             meta: {
                 featureId: id,
                 name: feature.name,
@@ -434,7 +434,7 @@ export const deleteFeatureByName = async (req: Request, res: Response) => {
             title: "🚩 Feature Deleted",
             description: `Feature ${name} deleted by ${user?.name || req.user?.name || 'Admin'}`,
             severity: ELogSeverity.WARNING,
-            
+
             meta: {
                 featureId: feature._id,
                 name,

@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { removeEmptyKeys, getErrorMessage } from "../../../lib";
 import { EInjurySeverity, IInjury } from "../../../types/injury.interface";
 import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../logs/helper";
+import { logAction } from "../../log/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import InjuryModel from "./injury.model";

@@ -5,7 +5,7 @@ import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { saveToArchive } from "../archives/helper";
-import { logAction } from "../logs/helper";
+import { logAction } from "../log/helper";
 import DonationModel from "./donations/donation.model";
 import SponsorModel from "./sponsor.model";
 import "../media/files/file.model";
