@@ -7,7 +7,7 @@ import { logAction } from "../../logs/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import InjuryModel from "./injury.model";
- 
+
 // GET /api/injuries
 export const getInjuries = async (req: Request, res: Response) => {
     try {
@@ -55,8 +55,6 @@ export const getInjuries = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const injuries = await InjuryModel.find(cleaned)
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition')
             .limit(limit)
             .skip(skip)
             .lean()
@@ -88,8 +86,6 @@ export const getInjuryById = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const injury = await InjuryModel.findById(id)
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition')
             .lean();
 
         if (!injury) {
@@ -196,14 +192,6 @@ export const createInjury = async (req: Request, res: Response) => {
     try {
         const { match, minute, player, description, severity, title, status } = req.body as IInjury;
 
-        // Validate required fields
-        if (!match || !player || !minute) {
-            return res.status(400).json({
-                success: false,
-                message: "Match ID, player ID, and minute are required",
-            });
-        }
-
         // Create injury record
         const savedInjury = await InjuryModel.create({
             minute,
@@ -213,7 +201,7 @@ export const createInjury = async (req: Request, res: Response) => {
             player,
             title: title || `${player.name} Injury`,
             status: status || 'active',
-            createdBy: req.user?.id,
+            // createdBy: req.user?.id,
             createdAt: new Date(),
         });
 
@@ -242,7 +230,7 @@ export const createInjury = async (req: Request, res: Response) => {
         await logAction({
             title: `🤕 Injury Created - ${title || player.name}`,
             description: description || `${player.name} injured at ${minute}'`,
-            severity: (severity === EInjurySeverity.MAJOR||severity==EInjurySeverity.SEVERE) ? ELogSeverity.CRITICAL : ELogSeverity.INFO,
+            severity: (severity === EInjurySeverity.MAJOR || severity == EInjurySeverity.SEVERE) ? ELogSeverity.CRITICAL : ELogSeverity.INFO,
             meta: {
                 injuryId: savedInjury._id,
                 playerId: player._id || player,
@@ -254,8 +242,6 @@ export const createInjury = async (req: Request, res: Response) => {
 
         // Populate for response
         const populatedInjury = await InjuryModel.findById(savedInjury._id)
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition')
             .lean();
 
         res.status(201).json({
@@ -287,13 +273,11 @@ export const updateInjury = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
         )
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition');
 
         if (!updatedInjury) {
             return res.status(404).json({
@@ -346,7 +330,7 @@ export const updateInjuryStatus = async (req: Request, res: Response) => {
                 $set: {
                     status,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                     recoveredAt: status === 'recovered' ? new Date() : undefined,
                 },
             },

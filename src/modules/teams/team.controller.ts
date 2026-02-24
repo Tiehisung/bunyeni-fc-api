@@ -57,10 +57,6 @@ export const getTeams = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const teams = await TeamModel.find(cleaned)
-            .populate('clubId', 'name logo stadium')
-            .populate('players', 'name number position')
-            .populate('coach', 'name')
-            .populate('logo')
             .limit(limit)
             .skip(skip)
             .lean()
@@ -92,12 +88,9 @@ export const getTeamById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const team = await TeamModel.findById(id)
-            .populate('clubId', 'name logo stadium founded')
-            .populate('players', 'name number position avatar')
-            .populate('coach', 'name email')
-            .populate('logo')
-            .lean();
+        const team = await TeamModel.findById(id).lean();
+
+
 
         if (!team) {
             return res.status(404).json({
@@ -195,6 +188,8 @@ export const createTeam = async (req: Request, res: Response) => {
     try {
         const teamData: IPostTeam = req.body;
 
+        console.log(teamData)
+
         // Check if team with same name and season already exists
         const existingTeam = await TeamModel.findOne({
             name: teamData.name,
@@ -212,7 +207,7 @@ export const createTeam = async (req: Request, res: Response) => {
         // Create team
         const createdTeam = await TeamModel.create({
             ...teamData,
-            createdBy: req.user?.id,
+            // createdBy: req.user?.id,
             createdAt: new Date(),
         });
 
@@ -237,8 +232,6 @@ export const createTeam = async (req: Request, res: Response) => {
 
         // Populate for response
         const populatedTeam = await TeamModel.findById(createdTeam._id)
-            .populate('clubId', 'name logo')
-            .populate('logo')
             .lean();
 
         res.status(201).json({
@@ -270,13 +263,12 @@ export const updateTeam = async (req: Request, res: Response) => {
                 $set: {
                     ...teamData,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
         )
-            .populate('clubId', 'name logo')
-            .populate('logo');
+
 
         if (!updated) {
             return res.status(404).json({
@@ -332,13 +324,12 @@ export const patchTeam = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
         )
-            .populate('clubId', 'name logo')
-            .populate('logo');
+
 
         if (!updated) {
             return res.status(404).json({
@@ -384,7 +375,7 @@ export const deleteTeam = async (req: Request, res: Response) => {
             originalId: id,
             data: teamToDelete,
             archivedAt: new Date(),
-            archivedBy: req.user?.id,
+            // archivedBy: req.user?.id,
             reason: 'Team deleted',
         });
 

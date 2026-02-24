@@ -1,14 +1,14 @@
 // controllers/card.controller.ts
 import type { Request, Response } from "express";
 import { getErrorMessage } from "../../../lib";
-import { ICard } from "../../../types/card.interface";
+import { ECardType, ICard } from "../../../types/card.interface";
 import { ELogSeverity } from "../../../types/log.interface";
 import { logAction } from "../../logs/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
-import CardModel from "./card.model";
+import CardModel, { IPostCard } from "./card.model";
 import { updateMatchEvent } from "../helpers";
- 
+
 
 // GET /api/cards
 export const getCards = async (req: Request, res: Response) => {
@@ -175,29 +175,22 @@ export const getCardsByPlayer = async (req: Request, res: Response) => {
 // POST /api/cards
 export const createCard = async (req: Request, res: Response) => {
     try {
-        const { match, minute, player, type, description,   } = req.body as ICard;
+        const { match, minute, player, type, description, } = req.body as IPostCard;
 
-        // Validate required fields
-        if (!match || !player || !minute || !type) {
-            return res.status(400).json({
-                success: false,
-                message: "Match ID, player ID, minute, and card type are required",
-            });
-        }
 
         // Validate card type
-        if (!['yellow', 'red'].includes(type)) {
+        if (![...Object.values(ECardType)].includes(type)) {
             return res.status(400).json({
                 success: false,
-                message: "Card type must be either 'yellow' or 'red'",
+                message: `Card type must be one of ${Object.values(ECardType).toString()}`,
             });
         }
 
         // Check if player already has a red card in this match
         if (type === 'red') {
             const existingRed = await CardModel.findOne({
-                match,
-                player: typeof player === 'object' ? player._id : player,
+                match: match?._id,
+                player: player?._id,
                 type: 'red'
             });
 
@@ -215,9 +208,8 @@ export const createCard = async (req: Request, res: Response) => {
             minute,
             player,
             type,
-            description: description ,
-            createdBy: req.user?.id,
-            createdAt: new Date(),
+            description: description,
+            // createdBy: req.user?.id,
         });
 
         if (!savedCard) {
@@ -226,19 +218,16 @@ export const createCard = async (req: Request, res: Response) => {
                 success: false
             });
         }
-
-        // Get player details for updates
-        const playerId = typeof player === 'object' ? player._id : player;
-        const playerDetails = typeof player === 'object' ? player : await PlayerModel.findById(playerId);
+ 
 
         // Update Player - add card reference
         await PlayerModel.findByIdAndUpdate(
-            playerId,
+            player?._id,
             { $push: { cards: savedCard._id } }
         );
 
         // Update Match - add card reference
-        const matchId = typeof match === 'object' ? match._id : match;
+        const matchId =   match?._id  
         await MatchModel.findByIdAndUpdate(
             matchId,
             { $push: { cards: savedCard._id } }
@@ -249,7 +238,7 @@ export const createCard = async (req: Request, res: Response) => {
         await updateMatchEvent(matchId, {
             type: 'card',
             minute: String(minute),
-            title: `${emoji} ${minute}' - ${playerDetails?.number || ''} ${playerDetails?.name || 'Player'}`,
+            title: `${emoji} ${minute}' - ${player?.number || ''} ${player?.name || 'Player'}`,
             description: description || `${type.toUpperCase()} card`,
             timestamp: new Date(),
         });
@@ -257,27 +246,21 @@ export const createCard = async (req: Request, res: Response) => {
         // Log action
         await logAction({
             title: `${emoji} ${type.toUpperCase()} Card Issued`,
-            description: description || `${type} card for ${playerDetails?.name}`,
+            description: description || `${type} card for ${player?.name}`,
             severity: type === 'red' ? ELogSeverity.WARNING : ELogSeverity.INFO,
             meta: {
                 cardId: savedCard._id,
                 matchId,
-                playerId,
+                playerId:player?._id,
                 type,
                 minute,
             },
         });
 
-        // Populate for response
-        const populatedCard = await CardModel.findById(savedCard._id)
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition opponent')
-            .lean();
-
         res.status(201).json({
             message: "Card recorded successfully!",
             success: true,
-            data: populatedCard
+            data: savedCard
         });
 
     } catch (error) {
@@ -291,7 +274,7 @@ export const createCard = async (req: Request, res: Response) => {
 // PUT /api/cards/:id
 export const updateCard = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const updates = req.body;
 
         // Remove _id from updates
@@ -303,13 +286,12 @@ export const updateCard = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    // updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
         )
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition opponent');
+         
 
         if (!updatedCard) {
             return res.status(404).json({
@@ -338,8 +320,7 @@ export const deleteCard = async (req: Request, res: Response) => {
 
         // Find card first to get details
         const cardToDelete = await CardModel.findById(id)
-            .populate('player')
-            .populate('match');
+           
 
         if (!cardToDelete) {
             return res.status(404).json({

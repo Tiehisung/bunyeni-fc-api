@@ -1,7 +1,6 @@
 
 import mongoose, { Schema } from "mongoose";
 import { ELogSeverity, ILog } from "../../types/log.interface";
-import { EUserRole } from "../../types/user";
 
 const logSchema = new Schema(
   {

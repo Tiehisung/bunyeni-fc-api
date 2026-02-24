@@ -12,32 +12,35 @@ declare global {
 }
 
 export const authenticate = async (
-    req: Request,
+    _req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    let token;
-    const header = req.headers.authorization;
 
-    if (!header?.startsWith("Bearer "))
-        return res.status(401).json({ message: "Unauthorized" });
+    //uncomment all to implement
+    
+    // let token;
+    // const header = req.headers.authorization;
 
-    if (header?.startsWith("Bearer")) {
-        token = header.split(" ")[1];
-    }
+    // if (!header?.startsWith("Bearer"))
+    //     return res.status(401).json({ message: "Unauthorized" });
 
-    if (!token)
-        return res.status(401).json({ message: "Not authorized" });
+    // if (header?.startsWith("Bearer")) {
+    //     token = header.split(" ")[1];
+    // }
+
+    // if (!token)
+    //     return res.status(401).json({ message: "Not authorized" });
 
     try {
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET!
-        ) as IAuthUser;
+        // const decoded = jwt.verify(
+        //     token,
+        //     process.env.JWT_SECRET!
+        // ) as IAuthUser;
 
-        // ✅ attach directly (no DB query)
-        req.user = decoded;
+        // // ✅ attach directly (no DB query)
+        // req.user = decoded;
 
         next();
     } catch (error) {
@@ -69,27 +72,27 @@ export const authenticate = async (
 
 /**
  * Role-based authorization middleware factory
- * @param roles - Allowed roles
+ * @param _roles - Allowed roles
  */
-export const authorize = (...roles: EUserRole[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        if (!req.user) {
-            return res.status(401).json({
-                success: false,
-                message: "Authentication required.",
-                code: "UNAUTHORIZED"
-            });
-        }
+export const authorize = (..._roles: EUserRole[]) => {
+    return (_req: Request, _res: Response, next: NextFunction) => {
+        // if (!req.user) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: "Authentication required.",
+        //         code: "UNAUTHORIZED"
+        //     });
+        // }
 
-        if (!roles.includes(req.user.role as EUserRole)) {
-            return res.status(403).json({
-                success: false,
-                message: `Access denied. Required roles: ${roles.join(", ")}`,
-                code: "FORBIDDEN",
-                userRole: req.user.role,
-                requiredRoles: roles
-            });
-        }
+        // if (!roles.includes(req.user.role as EUserRole)) {
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: `Access denied. Required roles: ${roles.join(", ")}`,
+        //         code: "FORBIDDEN",
+        //         userRole: req.user.role,
+        //         requiredRoles: roles
+        //     });
+        // }
 
         next();
     };

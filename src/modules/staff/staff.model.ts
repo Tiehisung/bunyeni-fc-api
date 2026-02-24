@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const managerSchema = new Schema(
+const staffSchema = new Schema(
     {
         fullname: { type: String, required: true },
         phone: {
@@ -39,7 +39,7 @@ const managerSchema = new Schema(
     { timestamps: true }
 );
 
-const ManagerModel =
-    mongoose.models.managers || mongoose.model("managers", managerSchema);
+const StaffModel =
+    mongoose.models.staff || mongoose.model("staff", staffSchema);
 
-export default ManagerModel;
+export default StaffModel;

@@ -30,5 +30,5 @@ export enum EArchivesCollection {
   TEAMS = 'teams',
   MATCHES = 'matches',
   SQUADS = "squads",
-  MANAGERS = "managers",
+  STAFF = "staff",
 }

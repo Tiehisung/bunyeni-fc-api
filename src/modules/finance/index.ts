@@ -2,12 +2,12 @@
  
 import { QueryFilter } from "mongoose"
 import { TransactionModel } from "./transaction.model"
-import { IFinancialSummary, ITransaction, TransactionType } from "./types"
+import { ITransactionsSummary, ITransaction, TransactionType } from "./types"
 
 /**
  * Get financial summary for a club within a date range
  */
-export async function getFinancialSummary(startDate: string, endDate: string): Promise<IFinancialSummary> {
+export async function getTransactionsSummary(startDate: string, endDate: string): Promise<ITransactionsSummary> {
 
     const query = {} as QueryFilter<unknown>
 

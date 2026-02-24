@@ -1,17 +1,17 @@
 // routes/manager.routes.ts
 import { Router } from "express";
 import {
-  getManagers,
-  getActiveManagers,
-  getManagersByRole,
+  getStaff,
+  getActiveStaff,
+  getStaffByRole,
   getManagerById,
-  createManager,
-  updateManager,
-  deactivateManager,
-  activateManager,
-  deleteManager,
-  getManagerStats,
-} from "./manager.controller";
+  createStaff,
+  updateStaff,
+  deactivateStaff,
+  activateStaff,
+  deleteStaff,
+  getStafftats,
+} from "./staff.controller";
 import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
 import { EUserRole } from "../../types/user";
 
@@ -19,10 +19,10 @@ import { EUserRole } from "../../types/user";
 const router = Router();
 
 // Public routes - anyone can view staff information
-router.get("/", getManagers);
-router.get("/active", getActiveManagers);
-router.get("/stats", getManagerStats);
-router.get("/role/:role", getManagersByRole);
+router.get("/", getStaff);
+router.get("/active", getActiveStaff);
+router.get("/stats", getStafftats);
+router.get("/role/:role", getStaffByRole);
 router.get("/:id", getManagerById);
 
 // Protected routes - require authentication
@@ -32,33 +32,33 @@ router.use(authenticate);
 router.post(
   "/",
   authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
-  createManager
+  createStaff
 );
 
 router.put(
   "/:id",
   authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
-  updateManager
+  updateStaff
 );
 
 // Status management
 router.patch(
   "/:id/deactivate",
   authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
-  deactivateManager
+  deactivateStaff
 );
 
 router.patch(
   "/:id/activate",
   authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
-  activateManager
+  activateStaff
 );
 
 // Deletion - admin only
 router.delete(
   "/:id",
   authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
-  deleteManager
+  deleteStaff
 );
 
 export default router;

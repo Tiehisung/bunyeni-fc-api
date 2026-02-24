@@ -16,8 +16,8 @@ import { EUserRole } from "../../types/user";
 const router = Router();
 
 // All log routes require authentication and admin access
-router.use(authenticate);
-router.use(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, EUserRole.PLAYER,)); // Only admins can access logs
+// router.use(authenticate);
+// router.use(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, EUserRole.PLAYER,)); // Only admins can access logs
 
 // Main routes
 router.get("/", getLogs);

@@ -31,7 +31,7 @@ router.use(authenticate);
 // Sponsor management
 router.route("/")
     .post(
-        authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
+        // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,),
         createSponsor
     );
 

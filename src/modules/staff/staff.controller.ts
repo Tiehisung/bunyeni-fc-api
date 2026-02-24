@@ -1,4 +1,4 @@
-// controllers/manager.controller.ts
+// controllers/staffMember.controller.ts
 import type { Request, Response } from "express";
  
 import { QueryFilter } from "mongoose";
@@ -8,10 +8,10 @@ import { EArchivesCollection } from "../../types/archive.interface";
 import { ELogSeverity } from "../../types/log.interface";
 import { saveToArchive } from "../archives/helper";
 import { logAction } from "../logs/helper";
-import ManagerModel from "./manager.model";
+import StaffModel from "./staff.model";
 
-// GET /api/managers
-export const getManagers = async (req: Request, res: Response) => {
+// GET /api/staff
+export const getStaff = async (req: Request, res: Response) => {
   try {
     const page = Number.parseInt(req.query.page as string || "1", 10);
     const limit = Number.parseInt(req.query.limit as string || "30", 10);
@@ -55,32 +55,28 @@ export const getManagers = async (req: Request, res: Response) => {
 
     const cleaned = removeEmptyKeys(query);
 
-    const managers = await ManagerModel.find(cleaned)
-      .populate('avatar')
+    const staff = await StaffModel.find(cleaned)
       .limit(limit)
       .skip(skip)
       .lean();
 
-    const total = await ManagerModel.countDocuments(cleaned);
+    const total = await StaffModel.countDocuments(cleaned);
 
-    // Get active managers by role for quick reference
-    const activeByRole = await ManagerModel.aggregate([
-      { $match: { isActive: true } },
-      {
-        $group: {
-          _id: "$role",
-          count: { $sum: 1 },
-          managers: { $push: { fullname: "$fullname", _id: "$_id" } }
-        }
-      }
-    ]);
+    // Get active staff by role for quick reference
+    // const activeByRole = await StaffModel.aggregate([
+    //   { $match: { isActive: true } },
+    //   {
+    //     $group: {
+    //       _id: "$role",
+    //       count: { $sum: 1 },
+    //       staff: { $push: { fullname: "$fullname", _id: "$_id" } }
+    //     }
+    //   }
+    // ]);
 
     res.status(200).json({
       success: true,
-      data: {
-        managers,
-        activeByRole,
-      },
+      data: staff,
       pagination: {
         page,
         limit,
@@ -91,50 +87,50 @@ export const getManagers = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: getErrorMessage(error, "Failed to fetch managers"),
+      message: getErrorMessage(error, "Failed to fetch staff"),
     });
   }
 };
 
-// GET /api/managers/active
-export const getActiveManagers = async (req: Request, res: Response) => {
+// GET /api/staff/active
+export const getActiveStaff = async (req: Request, res: Response) => {
   try {
-    const managers = await ManagerModel.find({ isActive: true })
+    const staff = await StaffModel.find({ isActive: true })
       .populate('avatar')
       .sort({ role: 1, fullname: 1 })
       .lean();
 
     res.status(200).json({
       success: true,
-      data: managers,
+      data: staff,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: getErrorMessage(error, "Failed to fetch active managers"),
+      message: getErrorMessage(error, "Failed to fetch active staff"),
     });
   }
 };
 
-// GET /api/managers/role/:role
-export const getManagersByRole = async (req: Request, res: Response) => {
+// GET /api/staff/role/:role
+export const getStaffByRole = async (req: Request, res: Response) => {
   try {
     const { role } = req.params;
     const page = Number.parseInt(req.query.page as string || "1", 10);
     const limit = Number.parseInt(req.query.limit as string || "20", 10);
     const skip = (page - 1) * limit;
 
-    const managers = await ManagerModel.find({ role })
+    const staff = await StaffModel.find({ role })
       .populate('avatar')
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const total = await ManagerModel.countDocuments({ role });
+    const total = await StaffModel.countDocuments({ role });
 
     res.status(200).json({
       success: true,
-      data: managers,
+      data: staff,
       pagination: {
         page,
         limit,
@@ -145,41 +141,41 @@ export const getManagersByRole = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: getErrorMessage(error, "Failed to fetch managers by role"),
+      message: getErrorMessage(error, "Failed to fetch staff by role"),
     });
   }
 };
 
-// GET /api/managers/:id
+// GET /api/staff/:id
 export const getManagerById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const manager = await ManagerModel.findById(id)
+    const staffMember = await StaffModel.findById(id)
       .populate('avatar')
       .lean();
 
-    if (!manager) {
+    if (!staffMember) {
       return res.status(404).json({
         success: false,
-        message: "Manager not found",
+        message: "Staff not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: manager,
+      data: staffMember,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: getErrorMessage(error, "Failed to fetch manager"),
+      message: getErrorMessage(error, "Failed to fetch staffMember"),
     });
   }
 };
 
-// POST /api/managers
-export const createManager = async (req: Request, res: Response) => {
+// POST /api/staff
+export const createStaff = async (req: Request, res: Response) => {
   try {
     const {
       fullname,
@@ -195,8 +191,8 @@ export const createManager = async (req: Request, res: Response) => {
       contractType
     } = req.body;
 
-    // Check if manager with same email exists
-    const exists = await ManagerModel.findOne({
+    // Check if staffMember with same email exists
+    const exists = await StaffModel.findOne({
       email: email.toLowerCase().trim(),
     });
 
@@ -207,29 +203,29 @@ export const createManager = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if there's already an active manager for this role
-    const existingActive = await ManagerModel.findOne({
+    // Check if there's already an active staffMember for this role
+    const existingActive = await StaffModel.findOne({
       role: role,
       isActive: true
     });
 
-    // If there's an existing active manager, deactivate them
+    // If there's an existing active staffMember, deactivate them
     if (existingActive) {
-      await ManagerModel.updateOne(
+      await StaffModel.updateOne(
         { role: role, isActive: true },
         {
           $set: {
             isActive: false,
             endDate: new Date(),
             updatedAt: new Date(),
-            replacedBy: req.user?.id
+            // replacedBy: req.user?.id
           }
         }
       );
     }
 
     // Save new staff
-    const saved = await ManagerModel.create({
+    const saved = await StaffModel.create({
       fullname,
       phone,
       email: email.toLowerCase().trim(),
@@ -242,7 +238,7 @@ export const createManager = async (req: Request, res: Response) => {
       startDate: startDate || new Date(),
       contractType: contractType || 'permanent',
       isActive: true,
-      createdBy: req.user?.id,
+      // createdBy: req.user?.id,
       createdAt: new Date(),
     });
 
@@ -259,7 +255,7 @@ export const createManager = async (req: Request, res: Response) => {
       description: `${fullname} appointed as ${role}`,
       severity: ELogSeverity.INFO,
       meta: {
-        managerId: saved._id,
+        staffMemberId: saved._id,
         role,
         department,
         replacedManager: existingActive?._id,
@@ -267,14 +263,14 @@ export const createManager = async (req: Request, res: Response) => {
     });
 
     // Populate for response
-    const populatedManager = await ManagerModel.findById(saved._id)
-      .populate('avatar')
+    const populatedStaff = await StaffModel.findById(saved._id)
+      
       .lean();
 
     res.status(201).json({
       message: "Staff created successfully",
       success: true,
-      data: populatedManager,
+      data: populatedStaff,
     });
   } catch (error) {
     res.status(500).json({
@@ -284,8 +280,8 @@ export const createManager = async (req: Request, res: Response) => {
   }
 };
 
-// PUT /api/managers/:id
-export const updateManager = async (req: Request, res: Response) => {
+// PUT /api/staff/:id
+export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -295,12 +291,12 @@ export const updateManager = async (req: Request, res: Response) => {
 
     // Check if email is being updated and if it already exists
     if (updates.email) {
-      const existingManager = await ManagerModel.findOne({
+      const existingStaff = await StaffModel.findOne({
         email: updates.email.toLowerCase().trim(),
         _id: { $ne: id }
       });
 
-      if (existingManager) {
+      if (existingStaff) {
         return res.status(409).json({
           success: false,
           message: "Email already in use by another staff member",
@@ -309,13 +305,13 @@ export const updateManager = async (req: Request, res: Response) => {
       updates.email = updates.email.toLowerCase().trim();
     }
 
-    const updated = await ManagerModel.findByIdAndUpdate(
+    const updated = await StaffModel.findByIdAndUpdate(
       id,
       {
         $set: {
           ...updates,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
       },
       { new: true, runValidators: true }
@@ -324,7 +320,7 @@ export const updateManager = async (req: Request, res: Response) => {
     if (!updated) {
       return res.status(404).json({
         success: false,
-        message: "Manager not found",
+        message: "Staff not found",
       });
     }
 
@@ -334,7 +330,7 @@ export const updateManager = async (req: Request, res: Response) => {
       description: `${updated.fullname}'s record updated`,
       severity: ELogSeverity.INFO,
       meta: {
-        managerId: id,
+        staffMemberId: id,
         updates: Object.keys(updates),
       },
     });
@@ -352,29 +348,29 @@ export const updateManager = async (req: Request, res: Response) => {
   }
 };
 
-// PATCH /api/managers/:id/deactivate
-export const deactivateManager = async (req: Request, res: Response) => {
+// PATCH /api/staff/:id/deactivate
+export const deactivateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const manager = await ManagerModel.findById(id);
+    const staffMember = await StaffModel.findById(id);
 
-    if (!manager) {
+    if (!staffMember) {
       return res.status(404).json({
         success: false,
-        message: "Manager not found",
+        message: "Staff not found",
       });
     }
 
-    if (!manager.isActive) {
+    if (!staffMember.isActive) {
       return res.status(400).json({
         success: false,
-        message: "Manager is already inactive",
+        message: "Staff is already inactive",
       });
     }
 
-    const updated = await ManagerModel.findByIdAndUpdate(
+    const updated = await StaffModel.findByIdAndUpdate(
       id,
       {
         $set: {
@@ -382,7 +378,7 @@ export const deactivateManager = async (req: Request, res: Response) => {
           endDate: new Date(),
           endReason: reason || 'End of contract',
           updatedAt: new Date(),
-          deactivatedBy: req.user?.id,
+          // deactivatedBy: req.user?.id,
         },
       },
       { new: true }
@@ -391,11 +387,11 @@ export const deactivateManager = async (req: Request, res: Response) => {
     // Log deactivation
     await logAction({
       title: "👔 Staff Deactivated",
-      description: `${manager.fullname} deactivated from ${manager.role}`,
+      description: `${staffMember.fullname} deactivated from ${staffMember.role}`,
       severity: ELogSeverity.WARNING,
       meta: {
-        managerId: id,
-        role: manager.role,
+        staffMemberId: id,
+        role: staffMember.role,
         reason,
       },
     });
@@ -413,30 +409,30 @@ export const deactivateManager = async (req: Request, res: Response) => {
   }
 };
 
-// PATCH /api/managers/:id/activate
-export const activateManager = async (req: Request, res: Response) => {
+// PATCH /api/staff/:id/activate
+export const activateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const manager = await ManagerModel.findById(id);
+    const staffMember = await StaffModel.findById(id);
 
-    if (!manager) {
+    if (!staffMember) {
       return res.status(404).json({
         success: false,
-        message: "Manager not found",
+        message: "Staff not found",
       });
     }
 
-    if (manager.isActive) {
+    if (staffMember.isActive) {
       return res.status(400).json({
         success: false,
-        message: "Manager is already active",
+        message: "Staff is already active",
       });
     }
 
-    // Check if there's already an active manager for this role
-    const existingActive = await ManagerModel.findOne({
-      role: manager.role,
+    // Check if there's already an active staffMember for this role
+    const existingActive = await StaffModel.findOne({
+      role: staffMember.role,
       isActive: true,
       _id: { $ne: id }
     });
@@ -444,18 +440,18 @@ export const activateManager = async (req: Request, res: Response) => {
     if (existingActive) {
       return res.status(409).json({
         success: false,
-        message: `There is already an active ${manager.role}. Please deactivate them first.`,
+        message: `There is already an active ${staffMember.role}. Please deactivate them first.`,
       });
     }
 
-    const updated = await ManagerModel.findByIdAndUpdate(
+    const updated = await StaffModel.findByIdAndUpdate(
       id,
       {
         $set: {
           isActive: true,
           startDate: new Date(),
           updatedAt: new Date(),
-          activatedBy: req.user?.id,
+          // activatedBy: req.user?.id,
         },
       },
       { new: true }
@@ -474,40 +470,40 @@ export const activateManager = async (req: Request, res: Response) => {
   }
 };
 
-// DELETE /api/managers/:id
-export const deleteManager = async (req: Request, res: Response) => {
+// DELETE /api/staff/:id
+export const deleteStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const manager = await ManagerModel.findById(id);
+    const staffMember = await StaffModel.findById(id);
 
-    if (!manager) {
+    if (!staffMember) {
       return res.status(404).json({
         success: false,
-        message: "Manager not found",
+        message: "Staff not found",
       });
     }
 
-    const deleted = await ManagerModel.findByIdAndDelete(id);
+    const deleted = await StaffModel.findByIdAndDelete(id);
 
-    // Archive the deleted manager
+    // Archive the deleted staffMember
     await saveToArchive({
-      sourceCollection: EArchivesCollection.MANAGERS,
-      originalId: manager._id?.toString(),
-      data: { ...manager.toObject(), isLatest: false },
-      reason: 'Manager deleted',
+      sourceCollection: EArchivesCollection.STAFF,
+      originalId: staffMember._id?.toString(),
+      data: { ...staffMember.toObject(), isLatest: false },
+      reason: 'Staff deleted',
        
     });
 
     // Log deletion
     await logAction({
       title: "👔 Staff Deleted",
-      description: `${manager.fullname} (${manager.role}) deleted on ${formatDate(new Date().toISOString())}`,
+      description: `${staffMember.fullname} (${staffMember.role}) deleted on ${formatDate(new Date().toISOString())}`,
       severity: ELogSeverity.CRITICAL,
       meta: {
-        managerId: id,
-        role: manager.role,
-        email: manager.email,
+        staffMemberId: id,
+        role: staffMember.role,
+        email: staffMember.email,
       },
     });
 
@@ -516,8 +512,8 @@ export const deleteManager = async (req: Request, res: Response) => {
       message: "Staff deleted successfully",
       data: {
         id: deleted?._id,
-        fullname: manager.fullname,
-        role: manager.role,
+        fullname: staffMember.fullname,
+        role: staffMember.role,
       },
     });
   } catch (error) {
@@ -528,10 +524,10 @@ export const deleteManager = async (req: Request, res: Response) => {
   }
 };
 
-// GET /api/managers/stats
-export const getManagerStats = async (req: Request, res: Response) => {
+// GET /api/staff/stats
+export const getStafftats = async (req: Request, res: Response) => {
   try {
-    const stats = await ManagerModel.aggregate([
+    const stats = await StaffModel.aggregate([
       {
         $facet: {
           totalStaff: [{ $count: "count" }],

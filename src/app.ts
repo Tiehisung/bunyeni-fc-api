@@ -26,7 +26,7 @@ import donationRoutes from './modules/sponsors/donations/donation.routes';
 import trainingRoutes from './modules/training/training.routes';
 import featureRoutes from './modules/features/feature.routes';
 import captaincyRoutes from './modules/captains/captain.routes';
-import managerRoutes from './modules/managers/manager.routes';
+import managerRoutes from './modules/staff/manager.routes';
 import logRoutes from './modules/logs/logs.routes';
 import archiveRoutes from './modules/archives/archive.route';
 import metricRoutes from './modules/metrics/metrics.routes';

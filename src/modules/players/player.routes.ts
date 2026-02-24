@@ -2,14 +2,11 @@
 import { Router } from "express";
 import {
     getPlayers,
-    getPlayerBySlugOrId,
-
+    getPlayer,
     createPlayer,
-
-    updatePlayerBySlugOrId,
-    patchPlayerBySlugOrId,
-
-    deletePlayerBySlugOrId,
+    updatePlayer,
+    patchPlayer,
+    deletePlayer,
 } from "../../modules/players/player.controller";
 import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
 import { EUserRole } from "../../types/user";
@@ -31,9 +28,9 @@ router.route("/")
 
 // Dynamic player routes by slug or ID
 router.route("/:slug")
-    .get(getPlayerBySlugOrId)
-    .put(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), updatePlayerBySlugOrId)
-    .patch(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), patchPlayerBySlugOrId)
-    .delete(authorize(EUserRole.SUPER_ADMIN), deletePlayerBySlugOrId);
+    .get(getPlayer)
+    .put(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), updatePlayer)
+    .patch(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), patchPlayer)
+    .delete(authorize(EUserRole.SUPER_ADMIN), deletePlayer);
 
 export default router;

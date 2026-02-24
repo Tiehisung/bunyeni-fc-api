@@ -27,18 +27,18 @@ router.get("/season/:season", getTeamsBySeason);
 router.get("/:id", getTeamById);
 
 // Protected routes - require authentication
-router.use(authenticate);
+// router.use(authenticate);
 
 // Team management
 router.route("/")
   .post(
-    authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
+    // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
     createTeam
   );
 
 router.route("/:id")
   .put(
-    authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
+    // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
     updateTeam
   )
   .patch(

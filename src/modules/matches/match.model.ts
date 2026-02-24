@@ -15,6 +15,8 @@ const matchSchema = new Schema(
     },
     goals: [{ type: Schema.Types.ObjectId, ref: "goals" }],
     squad: { type: Schema.Types.ObjectId, ref: "squad" },
+    cards: { type: Schema.Types.ObjectId, ref: "card" },
+    injuries: { type: Schema.Types.ObjectId, ref: "injury" },
 
     sponsor: [{ type: Schema.Types.ObjectId, ref: "sponsors" }],
     broadcaster: {},

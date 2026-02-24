@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { removeEmptyKeys } from "../../lib";
 import LogModel from "./logs.model";
 import { ELogSeverity } from "../../types/log.interface";
-import UserModel from "../users/user.model";// Ensure user model is registered for population
+import "../users/user.model";// Ensure user model is registered for population
 
 // GET /api/logs
 export const getLogs = async (req: Request, res: Response) => {
@@ -57,7 +57,7 @@ export const getLogs = async (req: Request, res: Response) => {
     const cleaned = removeEmptyKeys(query);
 
     const logs = await LogModel.find(cleaned)
-      .populate('userId', 'name email') // Populate user details
+
       .sort({ createdAt: 'desc' })
       .skip(skip)
       .limit(limit)
@@ -90,7 +90,6 @@ export const getLogById = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const log = await LogModel.findById(id)
-      .populate('userId', 'name email')
       .lean();
 
     if (!log) {
@@ -122,7 +121,6 @@ export const getLogsByUser = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const logs = await LogModel.find({ userId })
-      .populate('userId', 'name email')
       .sort({ createdAt: 'desc' })
       .skip(skip)
       .limit(limit)
@@ -152,7 +150,7 @@ export const getLogsByUser = async (req: Request, res: Response) => {
 // GET /api/logs/severity/:severity
 export const getLogsBySeverity = async (req: Request, res: Response) => {
   try {
-    const  severity   = req.params.severity as ELogSeverity;
+    const severity = req.params.severity as ELogSeverity;
     const page = Number.parseInt(req.query.page as string || "1", 10);
     const limit = Number.parseInt(req.query.limit as string || "20", 10);
     const skip = (page - 1) * limit;
@@ -168,7 +166,6 @@ export const getLogsBySeverity = async (req: Request, res: Response) => {
     }
 
     const logs = await LogModel.find({ severity })
-      .populate('userId', 'name email')
       .sort({ createdAt: 'desc' })
       .skip(skip)
       .limit(limit)
@@ -365,7 +362,6 @@ export const searchLogs = async (req: Request, res: Response) => {
     }
 
     const logs = await LogModel.find(query)
-      .populate('userId', 'name email')
       .sort({ createdAt: 'desc' })
       .skip(skip)
       .limit(limit)

@@ -9,26 +9,24 @@ import TrainingSessionModel, { IPostTrainingSession } from "./training.model";
 // GET /api/training
 export const getTrainingSessions = async (req: Request, res: Response) => {
   try {
-    const page = Number.parseInt(req.query.page as string || "1", 10);
-    const limit = Number.parseInt(req.query.limit as string || "20", 10);
+    // Pagination
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
-    const search = (req.query.training_search as string) || "";
-    const fromDate = req.query.fromDate as string;
-    const toDate = req.query.toDate as string;
-    const location = req.query.location as string;
-    const playerId = req.query.playerId as string;
+    // Filters
+    const { training_search, fromDate, toDate, location, playerId } = req.query;
 
-    const regex = new RegExp(search, "i");
+    // Build query
+    const query: any = {};
 
-    let query: any = {};
-
-    // Search filter
-    if (search) {
+    // Text search
+    if (training_search) {
+      const regex = new RegExp(training_search as string, "i");
       query.$or = [
-        { "location": regex },
-        { "note": regex },
-        { "attendance.attendedBy.name": regex },
+        { location: regex },
+        { note: regex },
+        { "attendance.attendedBy.name": regex }
       ];
     }
 
@@ -37,11 +35,11 @@ export const getTrainingSessions = async (req: Request, res: Response) => {
       query.location = location;
     }
 
-    // Date range filter
+    // Date range
     if (fromDate || toDate) {
       query.date = {};
-      if (fromDate) query.date.$gte = new Date(fromDate);
-      if (toDate) query.date.$lte = new Date(toDate);
+      if (fromDate) query.date.$gte = new Date(fromDate as string);
+      if (toDate) query.date.$lte = new Date(toDate as string);
     }
 
     // Player attendance filter
@@ -49,49 +47,49 @@ export const getTrainingSessions = async (req: Request, res: Response) => {
       query["attendance.attendedBy._id"] = playerId;
     }
 
-    const cleaned = removeEmptyKeys(query);
-
-    const trainingSessions = await TrainingSessionModel.find(cleaned)
-      .populate('recordedBy', 'name email')
-      .populate('attendance.attendedBy', 'name firstName lastName number position')
-      .limit(limit)
-      .skip(skip)
-      .lean()
-      .sort({ date: -1, createdAt: "desc" });
-
-    const total = await TrainingSessionModel.countDocuments(cleaned);
-
-    // Get attendance summary
-    const attendanceSummary = await TrainingSessionModel.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalSessions: { $sum: 1 },
-          totalAttendance: { $sum: { $size: "$attendance" } },
-          averageAttendance: { $avg: { $size: "$attendance" } },
-        },
-      },
+    // Execute queries in parallel for better performance
+    const [sessions, total] = await Promise.all([
+      TrainingSessionModel.find(query)
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      TrainingSessionModel.countDocuments(query)
     ]);
+
+    // Calculate attendance stats on the fly
+    const enhancedSessions = sessions.map(session => ({
+      ...session,
+      attendees: session.attendance?.attendedBy?.length || 0,
+      totalPlayers: session.attendance?.allPlayers?.length || 0
+    }));
+
+    // Overall stats
+    const totalAttendance = enhancedSessions.reduce((sum, s) => sum + s.attendees, 0);
+    const sessionsWithAttendance = enhancedSessions.filter(s => s.attendees > 0).length;
 
     res.status(200).json({
       success: true,
-      data: trainingSessions,
+      data: enhancedSessions,
       summary: {
-        totalSessions: attendanceSummary[0]?.totalSessions || 0,
-        totalAttendance: attendanceSummary[0]?.totalAttendance || 0,
-        averageAttendance: Math.round(attendanceSummary[0]?.averageAttendance || 0),
+        totalSessions: total,
+        totalAttendance,
+        averageAttendance: total ? Number((totalAttendance / total).toFixed(1)) : 0,
+        attendanceRate: total ? Math.round((sessionsWithAttendance / total) * 100) : 0
       },
       pagination: {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
-      },
+        pages: Math.ceil(total / limit)
+      }
     });
+
   } catch (error) {
+    console.error("Training sessions error:", error);
     res.status(500).json({
       success: false,
-      message: getErrorMessage(error, "Failed to fetch training sessions"),
+      message: getErrorMessage(error, "Failed to fetch training sessions")
     });
   }
 };
@@ -104,7 +102,6 @@ export const getUpcomingTraining = async (req: Request, res: Response) => {
     const sessions = await TrainingSessionModel.find({
       date: { $gte: new Date() }
     })
-      .populate('recordedBy', 'name email')
       .sort({ date: 1 })
       .limit(limit)
       .lean();
@@ -129,8 +126,6 @@ export const getRecentTraining = async (req: Request, res: Response) => {
     const sessions = await TrainingSessionModel.find({
       date: { $lte: new Date() }
     })
-      .populate('recordedBy', 'name email')
-      .populate('attendance.attendedBy', 'name firstName lastName number')
       .sort({ date: -1 })
       .limit(limit)
       .lean();
@@ -158,7 +153,6 @@ export const getPlayerTrainingHistory = async (req: Request, res: Response) => {
     const sessions = await TrainingSessionModel.find({
       "attendance.attendedBy._id": playerId
     })
-      .populate('recordedBy', 'name email')
       .sort({ date: -1 })
       .skip(skip)
       .limit(limit)
@@ -207,10 +201,7 @@ export const getTrainingSessionById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const session = await TrainingSessionModel.findById(id)
-      .populate('recordedBy', 'name email')
-      .populate('attendance.attendedBy', 'name firstName lastName number position avatar')
-      .lean();
+    const session = await TrainingSessionModel.findById(id).lean();
 
     if (!session) {
       return res.status(404).json({
@@ -263,7 +254,7 @@ export const createTrainingSession = async (req: Request, res: Response) => {
       date: new Date(date),
       location,
       note,
-      recordedBy: recordedBy || req.user?.id,
+      // recordedBy: recordedBy || req.user?.id,
       createdAt: new Date(),
       updateCount: 0,
     });
@@ -290,7 +281,7 @@ export const createTrainingSession = async (req: Request, res: Response) => {
 
     // Populate for response
     const populatedSession = await TrainingSessionModel.findById(savedSession._id)
-      .populate('recordedBy', 'name email')
+
       .populate('attendance.attendedBy', 'name firstName lastName number position')
       .lean();
 
@@ -338,14 +329,12 @@ export const updateTrainingSession = async (req: Request, res: Response) => {
         $set: {
           ...formData,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
         $inc: { updateCount: 1 },
       },
       { new: true, runValidators: true }
     )
-      .populate('recordedBy', 'name email')
-      .populate('attendance.attendedBy', 'name firstName lastName number position');
 
     if (!updated) {
       return res.status(500).json({
@@ -398,13 +387,12 @@ export const updateAttendance = async (req: Request, res: Response) => {
         $set: {
           attendance,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
         $inc: { updateCount: 1 },
       },
       { new: true }
     )
-      .populate('attendance.attendedBy', 'name firstName lastName number position');
 
     if (!updated) {
       return res.status(404).json({
@@ -438,7 +426,7 @@ export const updateSessionNote = async (req: Request, res: Response) => {
         $set: {
           note,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          // updatedBy: req.user?.id,
         },
         $inc: { updateCount: 1 },
       },
@@ -506,76 +494,50 @@ export const deleteTrainingSession = async (req: Request, res: Response) => {
 };
 
 // GET /api/training/stats
+
 export const getTrainingStats = async (req: Request, res: Response) => {
   try {
-    const stats = await TrainingSessionModel.aggregate([
-      {
-        $facet: {
-          totalSessions: [{ $count: "count" }],
-          byLocation: [
-            {
-              $group: {
-                _id: "$location",
-                count: { $sum: 1 },
-                totalAttendance: { $sum: { $size: "$attendance" } },
-              },
-            },
-            { $sort: { count: -1 } },
-          ],
-          byMonth: [
-            {
-              $group: {
-                _id: {
-                  year: { $year: "$date" },
-                  month: { $month: "$date" },
-                },
-                count: { $sum: 1 },
-                totalAttendance: { $sum: { $size: "$attendance" } },
-              },
-            },
-            { $sort: { "_id.year": -1, "_id.month": -1 } },
-            { $limit: 12 },
-          ],
-          attendanceStats: [
-            {
-              $group: {
-                _id: null,
-                totalAttendance: { $sum: { $size: "$attendance" } },
-                avgAttendance: { $avg: { $size: "$attendance" } },
-                maxAttendance: { $max: { $size: "$attendance" } },
-                minAttendance: { $min: { $size: "$attendance" } },
-              },
-            },
-          ],
-          recentAttendance: [
-            { $sort: { date: -1 } },
-            { $limit: 10 },
-            {
-              $project: {
-                date: 1,
-                location: 1,
-                attendeeCount: { $size: "$attendance" },
-              },
-            },
-          ],
-        },
-      },
-    ]);
+    const sessions = await TrainingSessionModel.find()
+      .sort({ date: -1 })
+      .lean();
+
+    const stats = {
+      totalSessions: sessions.length,
+      byLocation: {} as Record<string, number>,
+      byMonth: {} as Record<string, number>,
+      totalAttendance: 0,
+      averageAttendance: 0,
+      recentSessions: [] as any[],
+    };
+
+    sessions.forEach(session => {
+      // By location
+      if (session.location) {
+        stats.byLocation[session.location] = (stats.byLocation[session.location] || 0) + 1;
+      }
+
+      // By month
+      const monthKey = `${session.date.getFullYear()}-${session.date.getMonth() + 1}`;
+      stats.byMonth[monthKey] = (stats.byMonth[monthKey] || 0) + 1;
+
+      // Attendance
+      const attendeeCount = session.attendance?.attendedBy?.length || 0;
+      stats.totalAttendance += attendeeCount;
+    });
+
+    stats.averageAttendance = stats.totalSessions > 0
+      ? Math.round((stats.totalAttendance / stats.totalSessions) * 10) / 10
+      : 0;
+
+    stats.recentSessions = sessions.slice(0, 10).map(s => ({
+      date: s.date,
+      location: s.location,
+      attendees: s.attendance?.attendedBy?.length || 0,
+    }));
 
     res.status(200).json({
       success: true,
-      data: {
-        totalSessions: stats[0]?.totalSessions[0]?.count || 0,
-        byLocation: stats[0]?.byLocation || [],
-        byMonth: stats[0]?.byMonth || [],
-        attendance: stats[0]?.attendanceStats[0] || {
-          totalAttendance: 0,
-          avgAttendance: 0,
-          maxAttendance: 0,
-          minAttendance: 0,
-        },
-        recentAttendance: stats[0]?.recentAttendance || [],
-      },
+      data: stats,
     });
   } catch (error) {
     res.status(500).json({
