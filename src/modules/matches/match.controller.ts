@@ -12,13 +12,15 @@ import { EMatchStatus } from "../../types/match.interface";
 import { saveToArchive } from "../archives/helper";
 import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
+import PlayerModel from "../../modules/players/player.model";
 
 //For populating related data, you can import other models as needed
 import "../../modules/teams/team.model";
 import "../media/files/file.model";
 import "../../modules/players/player.model";
 import "./goals/goals.model";
-import PlayerModel from "../../modules/players/player.model";
+import   "./cards/card.model";
+ 
 
 // GET /api/matches
 export const getMatches = async (req: Request, res: Response) => {
