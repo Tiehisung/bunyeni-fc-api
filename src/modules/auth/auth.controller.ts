@@ -8,8 +8,9 @@ import { hasher } from "../../utils/hasher";
 
 export const register = async (req: Request, res: Response) => {
     try {
-        const { email, password, name } = req.body;
+        const { email, password, name, role, } = req.body;
 
+        console.log(req.body)
         // Check if user exists
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
@@ -24,7 +25,7 @@ export const register = async (req: Request, res: Response) => {
         const user = await UserModel.create({
             email,
             password: hashedPassword,
-            name
+            name, role
         });
 
         // Generate tokens

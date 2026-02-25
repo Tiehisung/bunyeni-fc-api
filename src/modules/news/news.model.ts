@@ -27,6 +27,7 @@ const newsSchema = new Schema(
     },
     metaDetails: {}, //ISquad etc
 
+    isPublished:Boolean,
     stats: {
       type: Schema.Types.Mixed,
       default: () => ({ isTrending: true, isLatest: true }),

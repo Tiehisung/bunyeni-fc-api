@@ -1,11 +1,11 @@
 // controllers/goal.controller.ts
 import type { Request, Response } from "express";
 import { getErrorMessage } from "../../../lib";
-import { logAction } from "../../log/helper";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import GoalModel, { IPostGoal } from "./goals.model";
 import { ELogSeverity } from "../../../types/log.interface";
+import { LoggerService } from "../../../shared/log.service";
 
 // GET /api/goals
 export const getGoals = async (req: Request, res: Response) => {
@@ -220,29 +220,9 @@ export const createGoal = async (req: Request, res: Response) => {
       }
     }
 
-    // Update live match events
-    // if (minute) {
-    //   const assistance = assist ? `Assist: ${assist?.number ?? ''} ${assist.name} ` : '';
-    //   await updateLiveMatchEvents(match?.toString(), {
-    //     type: 'goal',
-    //     minute: String(minute),
-    //     title: `⚽ ${minute}' - ${scorer?.number ?? ''} ${scorer?.name ?? 'Goal scored'}`,
-    //     description: `${assistance} ${description || ''} Mode: ${modeOfScore || 'N/A'}`,
-    //     timestamp: new Date(),
-    //   });
-    // }
 
-    // Log action
-    await logAction({
-      title: `Goal Created - ${updatedMatch?.title || 'Match'}`,
-      description: description || `Goal scored at ${minute}'`,
-      meta: {
-        goalId: savedGoal._id,
-        matchId: match,
-        scorer: scorer?.name,
-        minute,
-      },
-    });
+
+    LoggerService.info(`Goal Created - ${updatedMatch?.title || 'Match'}`, description || `Goal scored at ${minute}'`, req)
 
     // Populate for response
     const populatedGoal = await GoalModel.findById(savedGoal._id)
@@ -356,17 +336,8 @@ export const deleteGoal = async (req: Request, res: Response) => {
       }
     }
 
-    // Log action
-    await logAction({
-      title: `Goal Deleted - ${updatedMatch?.title || 'Match'}`,
-      description: deletedGoal?.description || 'Goal deleted',
-      severity: ELogSeverity.CRITICAL,
-      meta: {
-        goalId: goalId,
-        matchId: match,
-        scorer: scorer?.name,
-      },
-    });
+
+    LoggerService.critical(`Goal Deleted - ${updatedMatch?.title || 'Match'}`, deletedGoal?.description || 'Goal deleted', req)
 
     res.status(200).json({
       message: "Goal deleted successfully!",

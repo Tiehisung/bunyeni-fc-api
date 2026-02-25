@@ -9,6 +9,7 @@ import { logAction } from "../log/helper";
 import DonationModel from "./donations/donation.model";
 import SponsorModel from "./sponsor.model";
 import "../media/files/file.model";
+import { LoggerService } from "../../shared/log.service";
 
 
 // ==================== SPONSOR CONTROLLERS ====================
@@ -166,16 +167,7 @@ export const createSponsor = async (req: Request, res: Response) => {
       });
     }
 
-    // Log action
-    await logAction({
-      title: "🤝 Sponsor Created",
-      description: `New sponsor ${created.name || created.businessName} added`,
-      severity: ELogSeverity.INFO,
-      meta: {
-        sponsorId: created._id,
-        businessName: created.businessName,
-      },
-    });
+    LoggerService.info("🤝 Sponsor Created", `New sponsor ${created.name || created.businessName} added`, req)
 
     res.status(201).json({
       message: "Sponsor created successfully",
@@ -294,16 +286,7 @@ export const deleteSponsor = async (req: Request, res: Response) => {
     // Save to archive
     await saveToArchive(sponsor, EArchivesCollection.SPONSORS, '', req,);
 
-    // Log deletion
-    await logAction({
-      title: "🤝 Sponsor Deleted",
-      description: `Sponsor ${sponsor.name || sponsor.businessName} deleted on ${formatDate(new Date().toISOString())}`,
-      severity: ELogSeverity.CRITICAL,
-      meta: {
-        sponsorId: id,
-        donationsCount: sponsor.donations?.length || 0,
-      },
-    });
+    LoggerService.info("🤝 Sponsor Deleted", `Sponsor ${sponsor.name || sponsor.businessName} deleted on ${formatDate(new Date().toISOString())}`, req)
 
     res.status(200).json({
       message: "Sponsor deleted successfully",

@@ -161,7 +161,7 @@ export const createUser = async (req: Request, res: Response) => {
 };
 // PUT /api/users/:userId
 export const updateUser = async (req: Request, res: Response) => {
-  try {
+  try { 
     const userId = req.params.slug as string;
     const slug = slugIdFilters(userId);
     const { password, ...data } = req.body;
@@ -190,13 +190,11 @@ export const updateUser = async (req: Request, res: Response) => {
     const updated = await UserModel.findOneAndUpdate(
       slug,
       { $set: data },
-      { new: true, runValidators: true }
     ).select("-password");
 
     // Handle password update separately if provided
     if (password) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      const hashedPassword = await hasher(password);
 
       await UserModel.findOneAndUpdate(
         slug,

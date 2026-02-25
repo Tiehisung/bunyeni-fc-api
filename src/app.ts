@@ -136,7 +136,7 @@ app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/features', featureRoutes);
-app.use('/api/captaincy', captaincyRoutes);
+app.use('/api/captains', captaincyRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/archives', archiveRoutes);

@@ -277,7 +277,6 @@ export const createTransaction = async (req: Request, res: Response) => {
             reference: reference || `TRX-${Date.now()}`,
         });
 
-
         LoggerService.info("💰 Transaction Created", `${type}: ${description} - ${amount}`, req)
 
         res.status(201).json({

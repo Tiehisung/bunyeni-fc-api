@@ -74,7 +74,6 @@ export const getCaptains = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const captains = await CaptaincyModel.find(cleaned)
-            .populate('player', 'name firstName lastName number position avatar')
             .sort({ createdAt: -1, startDate: -1 })
             .skip(skip)
             .limit(limit)
@@ -84,15 +83,11 @@ export const getCaptains = async (req: Request, res: Response) => {
 
         // Get current active captains for quick reference
         const activeCaptains = await CaptaincyModel.find({ isActive: true })
-            .populate('player', 'name firstName lastName number position avatar')
             .lean();
 
         res.status(200).json({
             success: true,
-            data: {
-                captains,
-                activeCaptains,
-            },
+            data: captains,
             pagination: {
                 page,
                 limit,
@@ -112,7 +107,7 @@ export const getCaptains = async (req: Request, res: Response) => {
 export const getActiveCaptains = async (req: Request, res: Response) => {
     try {
         const captains = await CaptaincyModel.find({ isActive: true })
-            .populate('player', 'name firstName lastName number position avatar')
+
             .sort({ role: 1 })
             .lean();
 
@@ -158,7 +153,6 @@ export const getCaptaincyHistoryByRole = async (req: Request, res: Response) => 
         const skip = (page - 1) * limit;
 
         const history = await CaptaincyModel.find({ role })
-            .populate('player', 'name firstName lastName number position avatar')
             .sort({ startDate: -1 })
             .skip(skip)
             .limit(limit)
@@ -190,7 +184,6 @@ export const getCaptaincyById = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const captaincy = await CaptaincyModel.findById(id)
-            .populate('player', 'name firstName lastName number position avatar')
             .lean();
 
         if (!captaincy) {
@@ -255,16 +248,10 @@ export const assignCaptain = async (req: Request, res: Response) => {
 
         // Create new captaincy record
         const newCaptain = await CaptaincyModel.create({
-            player: {
-                _id: player._id,
-                name: player.name,
-                number: player.number,
-
-            },
+            player,
             role,
             isActive: true,
             startDate: new Date(),
-
         });
 
 
@@ -389,8 +376,8 @@ export const endCaptaincy = async (req: Request, res: Response) => {
 
                 },
             },
-            { new: true }
-        ).populate('player', 'name firstName lastName number position avatar');
+         
+        ) 
 
         // Log action
         await logAction({
@@ -435,7 +422,7 @@ export const updateCaptaincy = async (req: Request, res: Response) => {
 
                 },
             },
-            { new: true, runValidators: true }
+            
         ).populate('player', 'name firstName lastName number position avatar');
 
         if (!updated) {
