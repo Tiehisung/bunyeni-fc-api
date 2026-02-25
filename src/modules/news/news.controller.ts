@@ -307,6 +307,7 @@ export const updateNews = async (req: Request, res: Response) => {
     const filter = slugIdFilters(slug);
     const body = req.body;
 
+ 
     // If headline changed, update slug
     if (body.headline?.text) {
       body.slug = slugify(body.headline.text);
@@ -330,12 +331,10 @@ export const updateNews = async (req: Request, res: Response) => {
       filter,
       {
         $set: {
-          ...body,
-          updatedAt: new Date(),
-          // updatedBy: req.user?.id,
+          ...body, 
         },
       },
-      { new: true, runValidators: true }
+
     )
       .lean();
 

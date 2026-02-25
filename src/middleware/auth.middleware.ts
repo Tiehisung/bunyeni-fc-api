@@ -4,18 +4,25 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import UserModel from "../modules/users/user.model";
 
+
 export const authenticate = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
+    
+    
     try {
         // Get token from header or cookie
         const token = req.cookies?.accessToken ||
             req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
-            throw new Error();
+            return res.status(401).json({
+                success: false,
+                message: "No token provided",
+                code: "NO_TOKEN"
+            });
         }
 
         // Verify token
