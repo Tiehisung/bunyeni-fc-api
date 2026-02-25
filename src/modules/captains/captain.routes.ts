@@ -1,7 +1,7 @@
 // routes/captaincy.routes.ts
 import { Router } from "express";
-import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
-import { EUserRole } from "../../types/user";
+import { authenticate, authorize } from "../../middleware/auth.middleware";
+import { EUserRole } from "../../types/user.interface";
 import {
   getCaptains,
   getActiveCaptains,

@@ -84,13 +84,10 @@ export const getGalleryById = async (req: Request, res: Response) => {
                 message: "Gallery not found",
             });
         }
-        //Archive
-        saveToArchive({
-            data: gallery,
-            originalId: `${id}`,
-            sourceCollection: EArchivesCollection.GALLERIES,
-            reason: 'Sanitizing...',
-        })
+
+        // Save to archive
+        await saveToArchive(gallery, EArchivesCollection.GALLERIES, 'Sanitizing...', req,);
+
 
         // Log
         logAction({

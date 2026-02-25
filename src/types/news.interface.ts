@@ -1,5 +1,5 @@
 import { IFileProps, IFileUpload } from "./file.interface";
-import { IUser } from "./user";
+import { IUser } from "./user.interface";
 
 export interface INewsProps {
   _id: string;

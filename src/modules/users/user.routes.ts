@@ -2,14 +2,14 @@
 import { Router } from "express";
 import {
     getUsers,
-    getUserBySlugOrId,
-    updateUserBySlugOrId,
-    deleteUserBySlugOrId,
+    getUser,
+    updateUser,
+    deleteUser,
     changeUserPassword,
-    getMe
+    createUser
 } from "./user.controller";
-import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
-import { EUserRole } from "../../types/user";
+import { authenticate, authorize } from "../../middleware/auth.middleware";
+import { EUserRole } from "../../types/user.interface";
 
 
 const router = Router();
@@ -20,9 +20,11 @@ const router = Router();
 router.get('/', getUsers)
 
 router.route("/:slug")
-    .get(getUserBySlugOrId)
-    .put(authenticate, updateUserBySlugOrId)
-    .delete(deleteUserBySlugOrId);
+    .get(getUser)
+    .put(authenticate, updateUser)
+    .delete(deleteUser);
+
+router.post('/', authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,), createUser)
 
 // Additional user operations
 router.post(
@@ -30,6 +32,7 @@ router.post(
     authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, EUserRole.PLAYER, EUserRole.GUEST),
     changeUserPassword
 );
-router.get("/me", authenticate, getMe);
+
+// router.get("/me", authenticate, getMe);
 
 export default router;

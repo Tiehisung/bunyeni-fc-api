@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 
 import { getAge, getErrorMessage, getInitials, removeEmptyKeys, slugify } from "../../lib";
 import PlayerModel from "./player.model";
-import { EUserRole } from "../../types/user";
+import { EUserRole } from "../../types/user.interface";
 import UserModel from "../users/user.model";
 import { formatDate } from "../../lib/timeAndDate";
 import { generatePlayerAbout } from "../../data/about";

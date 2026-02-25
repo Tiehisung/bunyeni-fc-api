@@ -9,7 +9,7 @@ import { ELogSeverity } from "../../types/log.interface";
 import { slugIdFilters } from "../../lib/slug";
 import { saveToArchive } from "../archives/helper";
 import { EArchivesCollection } from "../../types/archive.interface";
-import { IAuthUser, } from "../../types/user";
+import { hasher } from "../../utils/hasher";
 
 /**
  * 
@@ -19,12 +19,12 @@ import { IAuthUser, } from "../../types/user";
 
  *console.log(user.id);
 */
-export const getMe = (req: Request): IAuthUser => {
-  if (!("user" in req) || !req.user) {
-    throw new Error("User not authenticated");
-  }
-  return req.user
-};
+// export const getMe = (req: Request): IAuthUser => {
+//   if (!("user" in req) || !req.user) {
+//     throw new Error("User not authenticated");
+//   }
+//   return req.user
+// };
 
 
 // GET /api/users
@@ -80,10 +80,9 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-// controllers/user.controller.ts (Add these to your existing user controller)
 
 // GET /api/users/:userId
-export const getUserBySlugOrId = async (req: Request, res: Response) => {
+export const getUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.slug as string;
     const slug = slugIdFilters(userId);
@@ -112,8 +111,56 @@ export const getUserBySlugOrId = async (req: Request, res: Response) => {
   }
 };
 
+
+// POST /api/users
+export const createUser = async (req: Request, res: Response) => {
+  try {
+
+    const { email, password, image, name, role } = req.body;
+
+    const hashedPass = await hasher(password)
+
+    const alreadyExists = await UserModel.findOne({ email });
+    if (alreadyExists) {
+      return res.status(409).json({
+        success: false,
+        message: `User with email ${email} already exists`,
+      });
+    }
+
+    const user = await UserModel.create({
+      email,
+      password: hashedPass,
+      image,
+      name,
+      role
+    });
+
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    // Log
+    await logAction({
+      title: `User [${name}] added.`,
+      description: `User added - ${name}`,
+
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "New user created",
+      data: userResponse,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: getErrorMessage(error, "Failed to create user"),
+    });
+  }
+};
 // PUT /api/users/:userId
-export const updateUserBySlugOrId = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.slug as string;
     const slug = slugIdFilters(userId);
@@ -186,7 +233,7 @@ export const updateUserBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // PATCH /api/users/:userId (partial updates)
-export const patchUserBySlugOrId = async (req: Request, res: Response) => {
+export const patchUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.slug as string;
     const slug = slugIdFilters(userId);
@@ -241,7 +288,7 @@ export const patchUserBySlugOrId = async (req: Request, res: Response) => {
 };
 
 // DELETE /api/users/:userId
-export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
     const slug = req.params.slug as string;
     const filter = slugIdFilters(slug);
@@ -256,7 +303,7 @@ export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
     }
 
     // Prevent self-deletion
-    if (req.user?.id === userToDelete._id.toString()) {
+    if (req.user?._id === userToDelete._id.toString()) {
       return res.status(400).json({
         success: false,
         message: "Cannot delete your own account",
@@ -274,13 +321,8 @@ export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
     // Delete the user
     const deleted = await UserModel.findOneAndDelete(filter).select("-password");
 
-    // Archive the deleted user
-    await saveToArchive({
-      data: deleted,
-      originalId: slug,
-      sourceCollection: EArchivesCollection.USERS,
-      reason: 'User deleted',
-    });
+    // Save to archive
+    await saveToArchive(deleted, EArchivesCollection.USERS, '', req,);
 
     // Log the deletion
     await logAction({
@@ -288,7 +330,7 @@ export const deleteUserBySlugOrId = async (req: Request, res: Response) => {
       description: `User ${deleted?.email} was deleted`,
       meta: {
         userId: deleted?._id,
-        deletedBy: req.user?.id,
+        deletedBy: req.user?._id,
         deletedByEmail: req.user?.email
       },
       severity: ELogSeverity.CRITICAL,
@@ -347,7 +389,7 @@ export const changeUserPassword = async (req: Request, res: Response) => {
     }
 
     // Check if user is changing their own password or is admin
-    const isOwnAccount = req.user?.id === user._id.toString();
+    const isOwnAccount = req.user?._id === user._id.toString();
     const isAdmin = req.user?.role === 'admin' || req.user?.role === 'super_admin';
 
     if (!isOwnAccount && !isAdmin) {
@@ -382,7 +424,7 @@ export const changeUserPassword = async (req: Request, res: Response) => {
       title: `Password changed for user [${user.name}]`,
       description: `User password was changed`,
       severity: ELogSeverity.CRITICAL,
-      meta: { targetUserId: user._id, changedBy: req.user?.id },
+      meta: { targetUserId: user._id, changedBy: req.user?._id },
     });
 
     res.status(200).json({

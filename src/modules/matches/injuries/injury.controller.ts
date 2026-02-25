@@ -116,7 +116,6 @@ export const getInjuriesByPlayer = async (req: Request, res: Response) => {
         const skip = (page - 1) * limit;
 
         const injuries = await InjuryModel.find({ player: playerId })
-            .populate('match', 'title date competition')
             .sort({ createdAt: "desc" })
             .skip(skip)
             .limit(limit)
@@ -148,7 +147,6 @@ export const getInjuriesByMatch = async (req: Request, res: Response) => {
         const { matchId } = req.params;
 
         const injuries = await InjuryModel.find({ match: matchId })
-            .populate('player', 'name number position avatar')
             .sort({ minute: "asc" })
             .lean();
 

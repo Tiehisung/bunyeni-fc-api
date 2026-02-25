@@ -172,7 +172,6 @@ export const createDonation = async (req: Request, res: Response) => {
       sponsor: sponsorId,
       value,
       category: category || 'general',
-      createdBy: req.user?.id,
       createdAt: new Date(),
     });
 
@@ -247,7 +246,6 @@ export const createDonationForSponsor = async (req: Request, res: Response) => {
       sponsor: sponsorId,
       value,
       category: category || 'general',
-      createdBy: req.user?.id,
       createdAt: new Date(),
     });
 

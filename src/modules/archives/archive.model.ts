@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { EArchivesCollection } from "../../types/archive.interface";
- 
+
 
 
 const archiveSchema = new mongoose.Schema(
   {
     // Original data
-    data: {},
+    doc: {},
 
     sourceCollection: {
       type: String,
@@ -15,19 +15,14 @@ const archiveSchema = new mongoose.Schema(
     },
     // Archive metadata
 
-    dateArchived: {
-      type: Date,
-      default: Date.now
-    },
-
-    reason: String,
-    originalId: mongoose.Schema.Types.ObjectId,
     user: {
       name: String,
       email: String,
       image: String,
       role: String
     }
+    ,
+    reason: String,
 
   }, {
   timestamps: true,

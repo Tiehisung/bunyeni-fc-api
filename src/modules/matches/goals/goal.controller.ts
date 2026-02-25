@@ -185,7 +185,7 @@ export const createGoal = async (req: Request, res: Response) => {
       assist,
       modeOfScore,
       forKFC,
-      createdBy: req?.user?.id,
+      createdBy: req?.user?._id,
       createdAt: new Date(),
     });
 
@@ -279,7 +279,7 @@ export const updateGoal = async (req: Request, res: Response) => {
         $set: {
           ...updates,
           updatedAt: new Date(),
-          updatedBy: req?.user?.id,
+          updatedBy: req?.user?._id,
         },
       },
       { new: true, runValidators: true }

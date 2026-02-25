@@ -8,8 +8,8 @@ import {
     patchPlayer,
     deletePlayer,
 } from "../../modules/players/player.controller";
-import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
-import { EUserRole } from "../../types/user";
+import { authenticate, authorize } from "../../middleware/auth.middleware";
+import { EUserRole } from "../../types/user.interface";
 
 
 const router = Router();

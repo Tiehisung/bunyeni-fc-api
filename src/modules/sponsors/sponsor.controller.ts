@@ -155,8 +155,6 @@ export const createSponsor = async (req: Request, res: Response) => {
 
     const created = await SponsorModel.create({
       ...sponsorData,
-      createdBy: req.user?.id,
-      createdAt: new Date(),
       badge: 0,
       totalDonations: 0,
     });
@@ -207,7 +205,6 @@ export const updateSponsor = async (req: Request, res: Response) => {
         $set: {
           ...sponsorData,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
         },
       },
       { new: true, runValidators: true }
@@ -245,7 +242,6 @@ export const toggleSponsorStatus = async (req: Request, res: Response) => {
         $set: {
           isActive,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
         },
       },
       { new: true }
@@ -294,13 +290,9 @@ export const deleteSponsor = async (req: Request, res: Response) => {
     // Delete sponsor
     const deleted = await SponsorModel.findByIdAndDelete(id);
 
-    // Archive the sponsor
-    await saveToArchive({
-      data: sponsor,
-      originalId: id,
-      sourceCollection: EArchivesCollection.SPONSORS,
-      reason: 'Sponsor deleted',
-    });
+
+    // Save to archive
+    await saveToArchive(sponsor, EArchivesCollection.SPONSORS, '', req,);
 
     // Log deletion
     await logAction({

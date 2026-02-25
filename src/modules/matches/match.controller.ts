@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 
 //For populating related data, you can import other models as needed
-import '../../shared/models'
+import '../../shared/models.imports'
 
 import { removeEmptyKeys, slugify } from "../../lib";
 import { slugIdFilters } from "../../lib/slug";
@@ -660,18 +660,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
         }
 
         // Save to archive
-        await saveToArchive({
-            sourceCollection: EArchivesCollection.MATCHES,
-            originalId: deleted._id?.toString(),
-            data: {
-                ...deleted,
-                isLatest: false,
-                deletedAt: new Date(),
-                // deletedBy: req.user?.id,
-            },
-            reason: 'Match deleted',
-
-        });
+        await saveToArchive(deleted, EArchivesCollection.MATCHES, '', req,);
 
         // Log the deletion
         await logAction({

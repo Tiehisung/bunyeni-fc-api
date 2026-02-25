@@ -485,15 +485,8 @@ export const deleteStaff = async (req: Request, res: Response) => {
     }
 
     const deleted = await StaffModel.findByIdAndDelete(id);
-
-    // Archive the deleted staffMember
-    await saveToArchive({
-      sourceCollection: EArchivesCollection.STAFF,
-      originalId: staffMember._id?.toString(),
-      data: { ...staffMember.toObject(), isLatest: false },
-      reason: 'Staff deleted',
-
-    });
+    // Save to archive
+    await saveToArchive(staffMember, EArchivesCollection.STAFF, '', req,);
 
     // Log deletion
     await logAction({
