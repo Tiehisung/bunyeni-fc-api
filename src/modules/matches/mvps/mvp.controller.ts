@@ -236,8 +236,7 @@ export const createMvp = async (req: Request, res: Response) => {
             description,
             positionPlayed,
             season: season || existingMatch?.season,
-            createdBy: req.user?.id,
-            createdAt: new Date(),
+
         });
 
         if (!savedMVP) {
@@ -319,8 +318,6 @@ export const updateMvp = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
@@ -497,8 +494,6 @@ export const getMvpById = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const mvp = await MvPModel.findById(id)
-            .populate('player', 'name number position avatar')
-            .populate('match', 'title date competition opponent')
             .lean();
 
         if (!mvp) {
@@ -528,8 +523,7 @@ export const updateMvpById = async (req: Request, res: Response) => {
 
         // Find current MVP data
         const previousMvpData = await MvPModel.findById(id)
-            .populate('player')
-            .populate('match');
+
 
         if (!previousMvpData) {
             return res.status(404).json({
@@ -556,13 +550,10 @@ export const updateMvpById = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...body,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
-        ).populate('player', 'name number position avatar')
-            .populate('match', 'title date competition opponent');
+        )
 
         if (!updated) {
             return res.status(500).json({
@@ -638,8 +629,6 @@ export const patchMvpById = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
@@ -778,9 +767,6 @@ export const transferMvp = async (req: Request, res: Response) => {
                     player: newPlayerId,
                     transferredFrom: oldPlayerId,
                     transferReason: reason,
-                    transferredAt: new Date(),
-                    transferredBy: req.user?.id,
-                    updatedAt: new Date(),
                 },
             },
             { new: true }

@@ -10,8 +10,8 @@ import {
     deleteSponsor,
     getSponsorStats,
 } from "./sponsor.controller";
-import { authenticate, authorize } from "../../shared/middleware/auth.middleware";
-import { EUserRole } from "../../types/user";
+import { authenticate, authorize } from "../../middleware/auth.middleware";
+import { EUserRole } from "../../types/user.interface";
 import { getDonationsBySponsor, createDonationForSponsor, deleteDonationBySponsor } from "./donations/donation.controller";
 
 const router = Router();

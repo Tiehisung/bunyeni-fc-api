@@ -9,7 +9,7 @@ import { deleteCldAssets } from "../files/helper";
 import { logAction } from "../../log/helper";
 import DocModel from "./doc.model";
 import FolderModel, { IPostFolder } from "./folder.model";
-import { EUserRole } from "../../../types/user";
+import { EUserRole } from "../../../types/user.interface";
 
 // ==================== MAIN DOCUMENT CONTROLLERS ====================
 
@@ -107,7 +107,7 @@ export const createDocument = async (req: Request, res: Response) => {
             tags,
             folder,
             format,
-            createdBy: req.user?.id,
+            createdBy: req.user?._id,
             createdAt: new Date(),
         });
 
@@ -147,7 +147,7 @@ export const updateDocument = async (req: Request, res: Response) => {
 
         const updatedDoc = await DocModel.findByIdAndUpdate(
             id,
-            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?.id } },
+            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?._id } },
             { new: true, runValidators: true }
         );
 
@@ -320,7 +320,7 @@ export const moveCopyDocuments = async (req: Request, res: Response) => {
 
             if (actionType === 'Move') {
                 await DocModel.findByIdAndUpdate(file._id, {
-                    $set: { folder: destinationFolder, updatedAt: new Date(), updatedBy: req.user?.id }
+                    $set: { folder: destinationFolder, updatedAt: new Date(), updatedBy: req.user?._id }
                 });
 
                 // Update folder associations
@@ -343,7 +343,7 @@ export const moveCopyDocuments = async (req: Request, res: Response) => {
                     ...docWithoutId,
                     folder: destinationFolder,
                     createdAt: new Date(),
-                    createdBy: req.user?.id,
+                    createdBy: req.user?._id,
                     copiedFrom: file._id,
                 });
 
@@ -451,7 +451,7 @@ export const createFolder = async (req: Request, res: Response) => {
             description,
             parent,
             documents: [],
-            createdBy: req.user?.id,
+            createdBy: req.user?._id,
             createdAt: new Date(),
         });
 
@@ -476,7 +476,7 @@ export const updateFolder = async (req: Request, res: Response) => {
 
         const folder = await FolderModel.findByIdAndUpdate(
             id,
-            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?.id } },
+            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?._id } },
             { new: true }
         );
 
@@ -618,7 +618,7 @@ export const updateFolderById = async (req: Request, res: Response) => {
             $set: {
                 ...updateData,
                 updatedAt: new Date(),
-                updatedBy: req.user?.id,
+                updatedBy: req.user?._id,
             },
         });
 
@@ -726,7 +726,7 @@ export const patchFolderById = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                    updatedBy: req.user?._id,
                 },
             },
             { new: true, runValidators: true }

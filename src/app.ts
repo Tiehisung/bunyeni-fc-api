@@ -5,11 +5,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-
+import cookieParser from 'cookie-parser';
 
 // Import routes
 import userRoutes from './modules/users/user.routes';
-import playerRoutes from './modules/players/player.routes';
 import teamRoutes from './modules/teams/team.routes';
 import matchRoutes from './modules/matches/match.routes';
 import goalRoutes from './modules/matches/goals/goal.routes';
@@ -31,13 +30,17 @@ import logRoutes from './modules/log/logs.routes';
 import archiveRoutes from './modules/archives/archive.route';
 import metricRoutes from './modules/metrics/metrics.routes';
 import authRoutes from './modules/auth/auth.routes';
-import { requestLogger } from './shared/middleware/logger.middleware';
-import { notFound, errorHandler } from './shared/middleware/error-handler.middleware';
+import { requestLogger } from './middleware/logger.middleware';
+import { notFound, errorHandler } from './middleware/error-handler.middleware';
+import { ENV } from './config/env';
 
 // Import middleware
 
 
 const app: Application = express();
+
+// Trust proxy (needed for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
 
 // ==================== SECURITY MIDDLEWARE ====================
 // Helmet for security headers
@@ -49,18 +52,22 @@ app.use(helmet({
 const corsOptions = {
     origin: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.FRONTEND_URL as string || 'https://bunyenifc.vercel.app'],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    exposedHeaders: ['set-cookie']
 };
 app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: ENV.RATE_LIMIT_WINDOW || (15 * 60 * 1000), // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.path === '/health' // Don't rate limit health checks
 });
+
+app.use(cookieParser());
 app.use('/api', limiter);
 
 // Special stricter rate limit for auth routes

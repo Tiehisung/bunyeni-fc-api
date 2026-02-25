@@ -181,9 +181,12 @@ export const createArchive = async (req: Request, res: Response) => {
       data,
       metadata: {
         ...metadata,
-        archivedBy: req.user?.id,
-        archivedAt: new Date(),
+
+
       },
+      user: req.user,
+      reason: '',
+      originalId: '',
     });
 
     res.status(201).json({

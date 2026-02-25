@@ -9,6 +9,7 @@ import { logAction } from "../log/helper";
 import PlayerModel from "../players/player.model";
 import FileModel from "../media/files/file.model";
 import CaptaincyModel from "./captain.model";
+import { LoggerService } from "../../shared/log.service";
 
 export type ICaptain = {
     isActive?: boolean;
@@ -246,8 +247,7 @@ export const assignCaptain = async (req: Request, res: Response) => {
                     $set: {
                         isActive: false,
                         endDate: new Date(),
-                        updatedAt: new Date(),
-                        endedBy: req.user?.id,
+
                     }
                 }
             );
@@ -264,26 +264,14 @@ export const assignCaptain = async (req: Request, res: Response) => {
             role,
             isActive: true,
             startDate: new Date(),
-            appointedBy: req.user?.id,
-            createdAt: new Date(),
+
         });
 
-        // Log action
-        await logAction({
-            title: "👑 Captain Assigned",
-            description: `${player.name} appointed as ${role}`,
-            severity: ELogSeverity.INFO,
-            meta: {
-                captaincyId: newCaptain._id,
-                playerId: player._id,
-                role,
-                previousCaptain: currentCaptain?._id,
-            },
-        });
+
+        LoggerService.info('👑 Captain Assigned', `${player.name} appointed as ${role}`, req,);
 
         // Populate for response
         const populatedCaptain = await CaptaincyModel.findById(newCaptain._id)
-            .populate('player', 'name firstName lastName number position avatar')
             .lean();
 
         res.status(201).json({
@@ -292,8 +280,9 @@ export const assignCaptain = async (req: Request, res: Response) => {
             data: populatedCaptain,
         });
     } catch (error) {
+        LoggerService.info('Failed to assign captain', '', req, error);
         res.status(500).json({
-            message: getErrorMessage(error, "Failed to assign captain"),
+            message: getErrorMessage(error,),
             success: false,
         });
     }
@@ -325,7 +314,7 @@ export const assignMultipleCaptains = async (req: Request, res: Response) => {
                         $set: {
                             isActive: false,
                             endDate: new Date(),
-                            endedBy: req.user?.id,
+
                         }
                     }
                 );
@@ -335,8 +324,7 @@ export const assignMultipleCaptains = async (req: Request, res: Response) => {
                     player,
                     role,
                     isActive: true,
-                    startDate: new Date(),
-                    appointedBy: req.user?.id,
+
                 });
 
                 results.push(newCaptain);
@@ -398,8 +386,7 @@ export const endCaptaincy = async (req: Request, res: Response) => {
                     isActive: false,
                     endDate: new Date(),
                     endReason: reason || 'End of tenure',
-                    endedBy: req.user?.id,
-                    updatedAt: new Date(),
+
                 },
             },
             { new: true }
@@ -445,8 +432,7 @@ export const updateCaptaincy = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+
                 },
             },
             { new: true, runValidators: true }

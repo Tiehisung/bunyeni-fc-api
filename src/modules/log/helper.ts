@@ -2,7 +2,7 @@
 
 import { ELogSeverity, ILog } from "../../types/log.interface";
 import LogModel from "./logs.model";
-import { getMe } from "../users/user.controller";
+// import { getMe } from "../users/user.controller";
 
  
 export async function logAction({

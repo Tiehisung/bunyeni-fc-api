@@ -1,30 +1,27 @@
-import { IUser } from "./user";
+import { IUser } from "./user.interface";
 
 // ARCHIVE
 export interface IArchive<T = unknown> {
-  data: T,
+  doc: T,
   sourceCollection: EArchivesCollection,
-  dateArchived: string
   reason: String,
-  originalId: string
-  archivedBy?: IUser
+  user?: IUser
 
   createdAt?: string;
   updatedAt?: string;
 }
 export interface IPostArchive<T = unknown> {
-  data: T,
+  doc: T,
   sourceCollection: EArchivesCollection,
   originalId?: string
-  dateArchived?: string
-  archivedBy?: string //objectId
   reason?: String,
+  user:IUser
 }
 
 export enum EArchivesCollection {
   PLAYERS = 'players',
   USERS = 'users',
-  GALLERIES = 'galleries', 
+  GALLERIES = 'galleries',
   NEWS = 'news',
   SPONSORS = 'sponsors',
   TEAMS = 'teams',

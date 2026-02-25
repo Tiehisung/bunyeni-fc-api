@@ -1,5 +1,5 @@
 import { IMatch } from "./match.interface";
-import { IUser } from "./user";
+import { IUser } from "./user.interface";
 
 export interface IInjury {
   _id?: string;

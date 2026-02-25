@@ -178,7 +178,7 @@ export const createHighlight = async (req: Request, res: Response) => {
     const savedHighlight = await HighlightModel.create({
       match,
       ...others,
-      createdBy: req.user?.id,
+      createdBy: req.user?._id,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -232,7 +232,7 @@ export const updateHighlight = async (req: Request, res: Response) => {
         $set: {
           ...updates,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          updatedBy: req.user?._id,
         },
       },
       { new: true, runValidators: true }
@@ -280,7 +280,7 @@ export const patchHighlight = async (req: Request, res: Response) => {
         $set: {
           ...updates,
           updatedAt: new Date(),
-          updatedBy: req.user?.id,
+          updatedBy: req.user?._id,
         },
       },
       { new: true, runValidators: true }

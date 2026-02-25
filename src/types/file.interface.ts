@@ -1,5 +1,5 @@
 import { EPreset, EPresetType } from ".";
-import { ISession } from "./user";
+import { ISession } from "./user.interface";
 
 export interface ICldFileUploadResult {
     secure_url: string;

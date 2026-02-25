@@ -1,4 +1,4 @@
-import { IUser } from "./user";
+import { IUser } from "./user.interface";
 
 export interface ILog {
     _id: string;
@@ -17,7 +17,7 @@ export interface ILog {
 export enum ELogSeverity {
     INFO = 'info',
     WARNING = 'warning',
-    CRITICAL = 'critical'
+    CRITICAL = 'critical',
+    ERROR = "error"
 }
 
- 

@@ -151,8 +151,7 @@ export const createFeature = async (req: Request, res: Response) => {
             category: category || 'general',
             isActive: isActive !== undefined ? isActive : true,
             settings: settings || {},
-            createdBy: req.user?.id,
-            createdAt: new Date(),
+            
         });
 
         // Log action
@@ -213,8 +212,7 @@ export const updateFeatureById = async (req: Request, res: Response) => {
                     ...(category && { category }),
                     ...(isActive !== undefined && { isActive }),
                     ...(settings && { settings }),
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
+                
                 }
             },
             { new: true, runValidators: true }
@@ -279,8 +277,8 @@ export const updateFeatureByName = async (req: Request, res: Response) => {
                     ...(category && { category }),
                     ...(isActive !== undefined && { isActive }),
                     ...(settings && { settings }),
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id || user?.id,
+                
+                 
                 }
             },
             { new: true, runValidators: true }
@@ -332,8 +330,6 @@ export const toggleFeatureStatus = async (req: Request, res: Response) => {
             {
                 $set: {
                     isActive,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true }

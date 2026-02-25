@@ -7,9 +7,9 @@ import {
     getPlayerRankings,
     getPlayerLeaderboard,
 } from "./playerStats.controller";
-import { authenticate, authorize } from "../../../shared/middleware/auth.middleware";
+import { authenticate, authorize } from "../../../middleware/auth.middleware";
 import { getErrorMessage } from "../../../lib";
-import { EUserRole } from "../../../types/user";
+import { EUserRole } from "../../../types/user.interface";
 
 
 const router = Router();

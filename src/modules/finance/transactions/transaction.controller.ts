@@ -3,10 +3,9 @@ import type { Request, Response } from "express";
 import { QueryFilter } from "mongoose";
 import { getTransactionsSummary, getClubTransactions } from "..";
 import { removeEmptyKeys, getErrorMessage } from "../../../lib";
-import { ELogSeverity } from "../../../types/log.interface";
-import { logAction } from "../../log/helper";
 import { TransactionModel } from "../transaction.model";
 import { TransactionType } from "../types";
+import { LoggerService } from "../../../shared/log.service";
 
 
 // GET /api/transactions
@@ -276,22 +275,10 @@ export const createTransaction = async (req: Request, res: Response) => {
             date: date || new Date(),
             attachmentUrl,
             reference: reference || `TRX-${Date.now()}`,
-            createdBy: req.user?.id,
-            createdAt: new Date(),
         });
 
-        // Log action
-        await logAction({
-            title: "💰 Transaction Created",
-            description: `${type}: ${description} - ${amount}`,
-            severity: ELogSeverity.INFO,
-            meta: {
-                transactionId: savedTransaction._id,
-                type,
-                amount,
-                category,
-            },
-        });
+
+        LoggerService.info("💰 Transaction Created", `${type}: ${description} - ${amount}`, req)
 
         res.status(201).json({
             message: "Transaction created successfully!",
@@ -330,24 +317,12 @@ export const updateTransaction = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
         );
 
-        // Log action
-        await logAction({
-            title: "💰 Transaction Updated",
-            description: updates.description || existingTransaction.description,
-
-            severity: ELogSeverity.INFO,
-            meta: {
-                transactionId: id,
-                updates: Object.keys(updates),
-            },
-        });
+        LoggerService.info('💰 Transaction Updated', updates.description || existingTransaction.description, req)
 
         res.status(200).json({
             message: "Transaction updated successfully",
@@ -379,17 +354,9 @@ export const deleteTransaction = async (req: Request, res: Response) => {
         // Delete transaction
         const deleted = await TransactionModel.findByIdAndDelete(id);
 
-        // Log action
-        await logAction({
-            title: "💰 Transaction Deleted",
-            description: `Transaction ${transaction.description} deleted`,
-            severity: ELogSeverity.WARNING,
-            meta: {
-                transactionId: id,
-                type: transaction.type,
-                amount: transaction.amount,
-            },
-        });
+
+
+        LoggerService.info('💰 Transaction Deleted', `Transaction ${transaction.description} deleted`, req)
 
         res.status(200).json({
             message: "Transaction deleted successfully",

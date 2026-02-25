@@ -185,8 +185,6 @@ export const createSquad = async (req: Request, res: Response) => {
             title: matchDetails.title,
             match: match._id || match,
             season: matchDetails.season,
-            createdBy: req.user?.id,
-            createdAt: new Date(),
         });
 
         if (!savedSquad) {
@@ -259,8 +257,6 @@ export const updateSquad = async (req: Request, res: Response) => {
             {
                 $set: {
                     ...updates,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true, runValidators: true }
@@ -320,8 +316,6 @@ export const updateSquadPlayers = async (req: Request, res: Response) => {
             {
                 $set: {
                     players,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true }
@@ -372,10 +366,7 @@ export const addSubstitution = async (req: Request, res: Response) => {
                         timestamp: new Date(),
                     },
                 },
-                $set: {
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
-                },
+
             },
             { new: true }
         )
@@ -414,8 +405,6 @@ export const updateFormation = async (req: Request, res: Response) => {
                 $set: {
                     formation,
                     tactics,
-                    updatedAt: new Date(),
-                    updatedBy: req.user?.id,
                 },
             },
             { new: true }
@@ -466,16 +455,9 @@ export const deleteSquad = async (req: Request, res: Response) => {
                 { $unset: { squad: "" } }
             );
         }
-
-        // Archive the squad
-        await saveToArchive({
-            data: squad,
-            originalId: id + '',
-            sourceCollection: EArchivesCollection.SQUADS,
-            reason: 'Squad deleted',
-
-        });
-
+ 
+        // Save to archive
+        await saveToArchive(squad, EArchivesCollection.SQUADS, '', req,);
         // Log deletion
         await logAction({
             title: "📋 Squad Deleted",
