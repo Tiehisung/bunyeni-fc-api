@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 dotenv.config(); // ✅ MUST BE FIRST LINE
 
 import app from './app';
-import connectDB from './config/db';
-import { ENV } from "./config/env";
+import connectDB from './config/db.config';
+import { ENV } from "./config/env.config";
 
 const PORT = ENV.PORT || 5000;
 

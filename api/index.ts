@@ -2,7 +2,7 @@
 //api/index.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import app from "../src/app";
-import connectDB from "../src/config/db";
+import connectDB from "../src/config/db.config";
 
 let isReady = false;
 

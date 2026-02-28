@@ -1,6 +1,6 @@
 // utils/jwt.utils.ts
 import jwt from 'jsonwebtoken';
-import { ENV } from '../config/env';
+import { ENV } from '../config/env.config';
 import { Types } from 'mongoose';
 
 interface TokenPayload {
