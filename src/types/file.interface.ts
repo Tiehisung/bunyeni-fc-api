@@ -61,3 +61,25 @@ export interface IGallery {
     createdAt?: string;
     updatedAt?: string;
 }
+
+
+
+export interface IMulterFile {
+    fieldname: string
+    originalname: string
+    encoding: string
+    mimetype: string
+    path: string
+    size: number
+    filename: string
+}
+
+const examplemulterfile = {
+    "fieldname": "image",
+    "originalname": "IMURAN MUFID.jpg",
+    "encoding": "7bit",
+    "mimetype": "image/jpeg",
+    "path": "https://res.cloudinary.com/djzfztrig/image/upload/v1772287441/bunyeni-fc/images/1772287438528-IMURAN%20MUFID.jpg",
+    "size": 148147,
+    "filename": "bunyeni-fc/images/1772287438528-IMURAN MUFID"
+}

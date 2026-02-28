@@ -30,9 +30,10 @@ import logRoutes from './modules/log/logs.routes';
 import archiveRoutes from './modules/archives/archive.route';
 import metricRoutes from './modules/metrics/metrics.routes';
 import authRoutes from './modules/auth/auth.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 import { requestLogger } from './middleware/logger.middleware';
 import { notFound, errorHandler } from './middleware/error-handler.middleware';
-import { ENV } from './config/env';
+import { ENV } from './config/env.config';
 
 // Import middleware
 
@@ -138,6 +139,7 @@ app.use('/api/training', trainingRoutes);
 app.use('/api/features', featureRoutes);
 app.use('/api/captains', captaincyRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/archives', archiveRoutes);
 app.use('/api/metrics', metricRoutes);
