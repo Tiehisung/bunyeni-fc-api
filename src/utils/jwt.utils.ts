@@ -1,9 +1,10 @@
 // utils/jwt.utils.ts
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env';
+import { Types } from 'mongoose';
 
 interface TokenPayload {
-    id: string;
+    _id: Types.ObjectId;
     email: string;
     role: string;
 }

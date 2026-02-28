@@ -30,7 +30,7 @@ export const register = async (req: Request, res: Response) => {
 
         // Generate tokens
         const { accessToken, refreshToken } = generateJwtTokens({
-            id: user._id.toString(),
+            _id: user._id.toString(),
             email: user.email,
             role: user.role
         });
@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
 
         // Generate tokens
         const { accessToken, refreshToken } = generateJwtTokens({
-            id: user._id.toString(),
+            _id: user._id.toString(),
             email: user.email,
             role: user.role
         });
@@ -164,7 +164,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
         // Find user with this refresh token
         const user = await UserModel.findOne({
-            _id: decoded.id,
+            _id: decoded._id,
             refreshToken
         });
 
@@ -177,7 +177,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
         // Generate new tokens
         const tokens = generateJwtTokens({
-            id: user._id.toString(),
+            _id: user._id.toString(),
             email: user.email,
             role: user.role
         });

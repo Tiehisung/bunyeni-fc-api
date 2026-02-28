@@ -504,11 +504,11 @@ export const getMatch = async (req: Request, res: Response) => {
         const filter = slugIdFilters(slug);
 
         const match = await MatchModel.findOne(filter)
-            .populate({ path: "opponent", populate: { path: "logo" } })
-            .populate({ path: "goals", populate: { path: "scorer assistant" } })
-            .populate({ path: "squad", populate: { path: "players.player" } })
-            .populate({ path: "cards", populate: { path: "player" } })
-            .populate({ path: "injuries", populate: { path: "player" } })
+            .populate({ path: "opponent",  })
+            .populate({ path: "goals", })
+            .populate({ path: "squad", })
+            .populate({ path: "cards", })
+            .populate({ path: "injuries", })
             .populate({ path: "mvp" })
             .lean();
 
@@ -554,7 +554,7 @@ export const updateMatch = async (req: Request, res: Response) => {
             },
             { new: true, runValidators: true }
         )
-            .populate({ path: "opponent", populate: { path: "logo" } })
+            .populate({ path: "opponent",   })
             .populate({ path: "goals" })
             .populate({ path: "squad" });
 
@@ -618,7 +618,7 @@ export const patchMatch = async (req: Request, res: Response) => {
             },
             { new: true, runValidators: true }
         )
-            .populate({ path: "opponent", populate: { path: "logo" } })
+            .populate({ path: "opponent",   })
             .populate({ path: "goals" })
             .populate({ path: "squad" });
 
