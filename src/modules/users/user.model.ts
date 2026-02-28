@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../../types/user.interface";
+import { generateJwtTokens } from "../../utils/jwt.utils";
 
 export type UserRole = "player" | "coach" | "admin";
 
@@ -36,7 +37,22 @@ const UserSchema = new Schema({
         type: Date,
         select: false
     }
-}, { timestamps: true });
+}, {
+    timestamps: true, 
+
+    //Fine Approach
+
+    // methods: {
+    //     async comparePassword(candidatePassword: string) {
+    //         return await bcrypt.compare(candidatePassword, this.password);
+    //     },
+
+    //     async generateToken() {
+    //         return generateJwtTokens(this);
+    //     },
+    // },
+
+});
 
 // Compare password method
 UserSchema.methods.comparePassword = async function (candidatePassword: string) {
