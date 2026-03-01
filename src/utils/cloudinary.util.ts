@@ -1,5 +1,7 @@
 // src/utils/cloudinary.helper.ts
+import { Request } from 'express';
 import { cloudinary } from '../config/cloudinary.config';
+import { ICloudinaryFile } from '../types/file.interface';
 
 export const getOptimizedUrl = (publicId: string, options?: any) => {
     return cloudinary.url(publicId, {
@@ -18,7 +20,7 @@ export const getThumbnailUrl = (publicId: string, width = 200, height = 200) => 
     });
 };
 
-export const getVideoThumbnail = (publicId: string, timestamp = '0') => {
+export const getVideoThumbnail = (publicId: string, timestamp = '4') => {
     return cloudinary.url(publicId, {
         resource_type: 'video',
         start_offset: timestamp,
@@ -26,3 +28,70 @@ export const getVideoThumbnail = (publicId: string, timestamp = '0') => {
         quality: 'auto'
     });
 };
+
+export const getDefaultCldFolder = (req: Request) => {
+    // Determine folder based on route or file type
+    let folder = 'bunyeni-fc';
+
+    // Customize folder based on request path
+    if (req.baseUrl.includes('players')) {
+        folder = 'bunyeni-fc/players';
+    } else if (req.baseUrl.includes('news')) {
+        folder = 'bunyeni-fc/news';
+    } else if (req.baseUrl.includes('matches')) {
+        folder = 'bunyeni-fc/matches';
+    } else if (req.baseUrl.includes('sponsors')) {
+        folder = 'bunyeni-fc/sponsors';
+    } else if (req.baseUrl.includes('staff')) {
+        folder = 'bunyeni-fc/staff';
+    }
+
+    return folder
+}
+
+
+export const formatCloudinaryResponse = (file: any): ICloudinaryFile => {
+    // If it's already a Cloudinary file (from CloudinaryStorage)
+    if (file.secure_url || file.public_id) {
+        return {
+            secure_url: file.secure_url || file.path,
+            url: file.path || file.url,
+            thumbnail_url: file.thumbnail_url || getVideoThumbnail(file.public_id),
+            public_id: file.public_id || file.filename,
+            resource_type: file.resource_type || getResourceType(file.mimetype),
+            format: file.format || getFileFormat(file.originalname),
+            bytes: file.bytes || file.size,
+            type: file.type || 'upload',
+            original_filename: file.original_filename || file.originalname,
+            width: file.width,
+            height: file.height,
+            duration: file.duration
+        };
+    }
+
+    // If it's a Multer file (from local storage)
+    return {
+        secure_url: file.path, // Local path
+        url: file.path,
+        public_id: file.filename,
+        resource_type: getResourceType(file.mimetype),
+        format: getFileFormat(file.originalname),
+        bytes: file.size,
+        type: 'upload',
+        original_filename: file.originalname,
+        thumbnail_url: getResourceType(file.mimetype) == 'video' ? getVideoThumbnail(file.filename) : getThumbnailUrl(file.filename),
+    };
+};
+
+// Helper functions
+const getResourceType = (mimetype: string): "image" | "video" | "raw" => {
+    if (mimetype.startsWith('image/')) return 'image';
+    if (mimetype.startsWith('video/')) return 'video';
+    return 'raw';
+};
+
+const getFileFormat = (filename: string): string => {
+    return filename.split('.').pop() || 'unknown';
+};
+
+

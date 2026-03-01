@@ -1,7 +1,7 @@
-import { EPreset, EPresetType } from ".";
-import { ISession } from "./user.interface";
+import { IUser } from "./user.interface";
 
-export interface ICldFileUploadResult {
+
+export interface ICloudinaryFile {
     secure_url: string;
     url: string;
     thumbnail_url?: string;
@@ -10,42 +10,18 @@ export interface ICldFileUploadResult {
     format?: string;
     bytes?: number;
     type: string;
-    name?: string;
     original_filename?: string;
-    tags?: string[];
-    width: number;
-    height: number;
-    id: string;
-    batchId: string;
-    asset_id: string;
-    version: number;
-    version_id: string;
-    signature: string;
-    created_at?: string;
-    etag: string;
-    placeholder: boolean;
-    folder?: string;
-    access_mode: string;
-    existing: boolean;
-    path?: string;
+    width?: number;
+    height?: number;
+    duration?: number;
 }
-
-export interface IFileProps extends ICldFileUploadResult {
-    _id?: string; //Trace any saved file data on db
+export interface IFileProps extends ICloudinaryFile {
+    //For DB
+    _id?: string;
     name?: string;
-    description?: string; //Optional field to save with file on db
+    description?: string;
     createdAt?: string;
     updatedAt?: string;
-}
-
-export interface IFileUpload {
-    name: string;
-    path: string;
-    type?: string;
-    preset?: EPreset;
-    folder?: string; //eg. logos, images, videos, audios/qiraa
-    presetType?: EPresetType;
-    description?: string;
 }
 
 export interface IGallery {
@@ -57,12 +33,10 @@ export interface IGallery {
 
     type?: 'player' | 'donation' | 'general',
     tags?: string[];
-    createdBy?: ISession['user']
+    createdBy?: Partial<IUser>
     createdAt?: string;
     updatedAt?: string;
 }
-
-
 
 export interface IMulterFile {
     fieldname: string

@@ -14,9 +14,9 @@ import { EUserRole } from "../../types/user.interface";
 
 const router = Router();
 
-// Public routes (if needed)
+
 router.route('/')
-    .get(getPlayers)
+    .get(getPlayers)// Public route
     .post(authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), createPlayer);;
 
 router.get("/:slug", getPlayer)

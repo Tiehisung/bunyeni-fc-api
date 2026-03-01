@@ -15,7 +15,7 @@ export interface IUser {
   createdAt?: string;
   updatedAt?: string;
 }
- 
+
 export enum EUserRole {
   ADMIN = 'admin',
   SUPER_ADMIN = 'super_admin',
@@ -26,17 +26,6 @@ export enum EUserRole {
 export enum EUserAccount {
   CREDENTIALS = 'credentials',
   GOOGLE = 'google',
-}
-export interface ISession {
-  user: {
-    id: string
-    name: string;
-    image: string;
-    role?: EUserRole
-    email: string;
-
-  };
-  expires: string
 }
 
 

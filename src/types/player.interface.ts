@@ -2,7 +2,7 @@
  
 import { EColor } from "./color";
 import { IGoal, IMatch } from "./match.interface";
-import { ICldFileUploadResult, IFileProps, IGallery } from "./file.interface";
+import { ICloudinaryFile, IGallery } from "./file.interface";
 import { IInjury } from "./injury.interface";
 import { ICard } from "./card.interface";
 
@@ -34,7 +34,7 @@ export interface IPlayer {
 
     height: number;
     avatar: string;
-    featureMedia?: ICldFileUploadResult[];
+    featureMedia?: ICloudinaryFile[];
     position: EPlayerPosition;
     favColor?: EColor
     //Stats
@@ -186,7 +186,7 @@ export interface IPostPlayer {
     email: string;
     dob: string;
     height: string;
-    avatar: IFileProps;
+    avatar: string;
     jersey: string | number;
     manager: string;
     position: EPlayerPosition;

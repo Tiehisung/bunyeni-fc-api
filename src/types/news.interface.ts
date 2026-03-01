@@ -1,4 +1,4 @@
-import { IFileProps, IFileUpload } from "./file.interface";
+import { IFileProps,   } from "./file.interface";
 import { IUser } from "./user.interface";
 
 export interface INewsProps {
@@ -44,14 +44,14 @@ export interface IPostNews {
   };
   headline: {
     text: string;
-    image: Partial<IFileUpload>;
+    image: Partial<IFileProps>;
     hasVideo?: boolean;
-    sponsor?: Partial<IFileUpload>;
+    sponsor?: Partial<IFileProps>;
   };
   details: {
     _id?: string;
     text?: string;
-    media?: IFileUpload[];
+    media?: IFileProps[];
   }[];
   reporter?: {
     name: string;

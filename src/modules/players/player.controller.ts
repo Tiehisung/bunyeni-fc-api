@@ -24,7 +24,7 @@ import "../media/galleries/gallery.model";
 export const getPlayers = async (req: Request, res: Response) => {
     try {
         const page = Number.parseInt(req.query.page as string || "1", 10);
-        const ageStatus = (req.query.ageStatus as string) || EPlayerAgeStatus.YOUTH;
+        // const ageStatus = (req.query.ageStatus as string) || EPlayerAgeStatus.YOUTH;
         const limit = Number.parseInt(req.query.limit as string || "30", 10);
         const skip = (page - 1) * limit;
 
@@ -45,7 +45,7 @@ export const getPlayers = async (req: Request, res: Response) => {
                 { "status": regex },
             ],
             status,
-            ageStatus,
+            // ageStatus,
             // [field]: value
         };
 
@@ -109,6 +109,8 @@ export const createPlayer = async (req: Request, res: Response) => {
     try {
         const pf = req.body as IPostPlayer;
 
+        console.log(pf)
+
         // Ensure unique code ----------------------------------------
         let playerCode = generatePlayerID(pf.firstName, pf.lastName, pf.dob);
 
@@ -136,13 +138,16 @@ export const createPlayer = async (req: Request, res: Response) => {
 
         const about = pf.about || generatePlayerAbout(pf.firstName, pf.lastName, pf.position);
 
+        const avatar = req.file
+
         const newPlayer = await PlayerModel.create({
             ...pf,
             slug,
             code: playerCode,
             email,
             about,
-            ageStatus
+            ageStatus, 
+            avatar: avatar?.path as string
         });
 
         // Create User
