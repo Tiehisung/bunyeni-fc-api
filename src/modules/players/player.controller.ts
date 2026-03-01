@@ -24,7 +24,7 @@ import "../media/galleries/gallery.model";
 export const getPlayers = async (req: Request, res: Response) => {
     try {
         const page = Number.parseInt(req.query.page as string || "1", 10);
-        const ageStatus = (req.query.ageStatus as string) || EPlayerAgeStatus.YOUTH;
+        // const ageStatus = (req.query.ageStatus as string) || EPlayerAgeStatus.YOUTH;
         const limit = Number.parseInt(req.query.limit as string || "30", 10);
         const skip = (page - 1) * limit;
 
@@ -45,7 +45,7 @@ export const getPlayers = async (req: Request, res: Response) => {
                 { "status": regex },
             ],
             status,
-            ageStatus,
+            // ageStatus,
             // [field]: value
         };
 
@@ -107,7 +107,7 @@ export const generatePlayerID = (
 // POST /api/players
 export const createPlayer = async (req: Request, res: Response) => {
     try {
-        const pf = req.body.data as IPostPlayer;
+        const pf = req.body as IPostPlayer;
 
         console.log(pf)
 

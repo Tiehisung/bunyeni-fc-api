@@ -10,7 +10,6 @@ import {
 } from "../../modules/players/player.controller";
 import { authenticate, authorize } from "../../middleware/auth.middleware";
 import { EUserRole } from "../../types/user.interface";
-import { uploadSingleImage } from "../../config/cloudinary.config";
 
 
 const router = Router();
@@ -18,7 +17,7 @@ const router = Router();
 
 router.route('/')
     .get(getPlayers)// Public route
-    .post(authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), uploadSingleImage, createPlayer);;
+    .post(authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), createPlayer);;
 
 router.get("/:slug", getPlayer)
 
