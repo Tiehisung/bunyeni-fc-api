@@ -107,7 +107,9 @@ export const generatePlayerID = (
 // POST /api/players
 export const createPlayer = async (req: Request, res: Response) => {
     try {
-        const pf = req.body as IPostPlayer;
+        const pf = req.body.data as IPostPlayer;
+
+        console.log(pf)
 
         // Ensure unique code ----------------------------------------
         let playerCode = generatePlayerID(pf.firstName, pf.lastName, pf.dob);
@@ -136,13 +138,16 @@ export const createPlayer = async (req: Request, res: Response) => {
 
         const about = pf.about || generatePlayerAbout(pf.firstName, pf.lastName, pf.position);
 
+        const avatar = req.file
+
         const newPlayer = await PlayerModel.create({
             ...pf,
             slug,
             code: playerCode,
             email,
             about,
-            ageStatus
+            ageStatus, 
+            avatar: avatar?.path as string
         });
 
         // Create User

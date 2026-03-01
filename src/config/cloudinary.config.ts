@@ -4,6 +4,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import { ENV } from './env.config';
 import { getSafeName } from '../utils/sanitizer.utils';
+import { getDefaultCldFolder } from '../utils/cloudinary.util';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -12,14 +13,39 @@ cloudinary.config({
     api_secret: ENV.CLOUDINARY.SECRET,
 });
 
-// ==================== STORAGE CONFIGURATIONS ====================
+//  STORAGE CONFIGURATIONS 
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        return {
+            folder: getDefaultCldFolder(req),
+            allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'pdf', 'mp4'],
+            resource_type: 'auto',
+        };
+    },
+});
+
+//  FILE FILTER 
+
+const fileFilter = (_req: any, file: any, cb: any) => {
+    // Allow images, videos, and PDFs
+    if (file.mimetype.startsWith('image/') ||
+        file.mimetype.startsWith('video/') ||
+        file.mimetype === 'application/pdf') {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Only images, videos, and PDFs are allowed!'), false);
+    }
+};
+
+
 
 // Storage for images
 const imageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         return {
-            folder: 'bunyeni-fc/images',
+            folder: getDefaultCldFolder(req),
             format: 'jpg', // Convert all images to jpg
             public_id: `${Date.now()}-${getSafeName(file.originalname.split('.')[0])}`,
             transformation: [
@@ -35,7 +61,7 @@ const videoStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         return {
-            folder: 'bunyeni-fc/videos',
+            folder: getDefaultCldFolder(req),
             resource_type: 'video',
             public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
             chunk_size: 6000000, // For large videos (6MB chunks)
@@ -48,7 +74,7 @@ const documentStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         return {
-            folder: 'bunyeni-fc/documents',
+            folder: getDefaultCldFolder(req),
             resource_type: 'raw',
             public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
             format: file.originalname.split('.').pop(),
@@ -56,9 +82,9 @@ const documentStorage = new CloudinaryStorage({
     },
 });
 
-// ==================== FILE FILTERS ====================
+//  FILE FILTERS 
 
-const imageFilter = (req: any, file: any, cb: any) => {
+const imageFilter = (_req: any, file: any, cb: any) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
     if (allowedTypes.includes(file.mimetype)) {
@@ -68,7 +94,7 @@ const imageFilter = (req: any, file: any, cb: any) => {
     }
 };
 
-const videoFilter = (req: any, file: any, cb: any) => {
+const videoFilter = (_req: any, file: any, cb: any) => {
     const allowedTypes = ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm'];
 
     if (allowedTypes.includes(file.mimetype)) {
@@ -78,7 +104,7 @@ const videoFilter = (req: any, file: any, cb: any) => {
     }
 };
 
-const documentFilter = (req: any, file: any, cb: any) => {
+const documentFilter = (_req: any, file: any, cb: any) => {
     const allowedTypes = [
         'application/pdf',
         'application/msword',
@@ -93,21 +119,30 @@ const documentFilter = (req: any, file: any, cb: any) => {
     }
 };
 
-// ==================== MULTER UPLOADERS ====================
+//  MULTER UPLOADERS 
+
+//  CREATE MULTER INSTANCE 
+export const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB max file size
+    },
+    fileFilter: fileFilter
+});
 
 // For single image upload
 export const uploadSingleImage = multer({
     storage: imageStorage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     fileFilter: imageFilter
-}).single('image');
+}).single('image'); //name could be 'avatar' just make sure that contained in the formdata matches this as 'image'
 
 // For multiple images (gallery)
 export const uploadMultipleImages = multer({
     storage: imageStorage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per image
     fileFilter: imageFilter
-}).array('images', 10); // Max 10 images
+}).array('images', 10); // Max 10 images. Formdata field to hold raw images from FE must be name 'images' or both changed to match.
 
 // For video upload
 export const uploadVideo = multer({
@@ -125,7 +160,7 @@ export const uploadDocument = multer({
 
 // For mixed uploads (different fields)
 export const uploadMixed = multer({
-    storage: imageStorage, // Default storage
+    storage: storage, // Default storage
     limits: { fileSize: 10 * 1024 * 1024 },
 }).fields([
     { name: 'avatar', maxCount: 1 },

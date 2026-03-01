@@ -73,7 +73,7 @@ export const authenticate = async (
             });
         }
 
-        console.error("Authentication error:", error);
+        // console.error("Authentication error:", error);
         return res.status(HttpStatusCode.InternalServerError).json({
             success: false,
             message: "Authentication failed due to server error.",

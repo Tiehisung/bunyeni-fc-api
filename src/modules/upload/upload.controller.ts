@@ -2,7 +2,8 @@
 import { Request, Response } from 'express';
 import { cloudinary } from '../../config/cloudinary.config';
 import { HttpStatusCode, } from 'axios'
-import { IMulterFile } from '../../types/file.interface';
+import { ICloudinaryFile, IMulterFile } from '../../types/file.interface';
+import { formatCloudinaryResponse } from '../../utils/cloudinary.util';
 
 // Upload single image
 export const uploadImageCTR = async (req: Request, res: Response) => {
@@ -15,26 +16,16 @@ export const uploadImageCTR = async (req: Request, res: Response) => {
         }
 
         // Multer-Cloudinary automatically uploads and gives us the file info
-        const file = req.file as IMulterFile; // 'any' because Cloudinary adds extra fields
-        console.log(file)
+        const uploadedFile = req.file as IMulterFile;
+        const formattedFile: ICloudinaryFile = formatCloudinaryResponse(uploadedFile);
+
         res.status(HttpStatusCode.Ok).json({
             success: true,
             message: 'Image uploaded successfully',
-            data: {
-                url: file.path, // Cloudinary URL
-                secure_url: file.path,
-                public_id: file.filename, // Cloudinary public_id
-                bytes: file.size,
-                // format: file.format,
-                // width: file.width,
-                // height: file.height,
-
-
-            }
+            data: formattedFile
         });
 
     } catch (error) {
-        console.error('Upload error:', error);
         res.status(HttpStatusCode.InternalServerError).json({
             success: false,
             message: 'Image upload failed'
@@ -54,14 +45,7 @@ export const uploadGalleryCTR = async (req: Request, res: Response) => {
             });
         }
 
-        const images = (files as IMulterFile[]).map(file => ({
-            url: file.path,
-            secure_url: file.path,
-            public_id: file.filename,
-            // format: file.format,
-            // width: file.width,
-            // height: file.height,
-        }));
+        const images = (files as IMulterFile[]).map(file => formatCloudinaryResponse(file));
 
         res.status(HttpStatusCode.Ok).json({
             success: true,
@@ -88,19 +72,13 @@ export const uploadVideoFileCTR = async (req: Request, res: Response) => {
             });
         }
 
-        const file = req.file as any;
+        const uploadedFile = req.file as IMulterFile;
+        const formattedFile: ICloudinaryFile = formatCloudinaryResponse(uploadedFile);
 
         res.status(HttpStatusCode.Ok).json({
             success: true,
             message: 'Video uploaded successfully',
-            data: {
-                url: file.path,
-                secure_url: file.secure_url || file.path,
-                public_id: file.filename,
-                format: file.format,
-                duration: file.duration,
-                bytes: file.size,file
-            }
+            data: formattedFile
         });
 
     } catch (error) {
@@ -122,19 +100,13 @@ export const uploadDocumentFileCTR = async (req: Request, res: Response) => {
             });
         }
 
-        const file = req.file as any;
+        const uploadedFile = req.file as IMulterFile;
+        const formattedFile: ICloudinaryFile = formatCloudinaryResponse(uploadedFile);
 
         res.status(HttpStatusCode.Ok).json({
             success: true,
             message: 'Document uploaded successfully',
-            data: {
-                url: file.path,
-                secure_url: file.secure_url || file.path,
-                public_id: file.filename,
-                format: file.format,
-                bytes: file.size,
-                original_name: file.originalname
-            }
+            data: formattedFile
         });
 
     } catch (error) {
