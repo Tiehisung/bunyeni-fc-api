@@ -138,7 +138,6 @@ export const createPlayer = async (req: Request, res: Response) => {
 
         const about = pf.about || generatePlayerAbout(pf.firstName, pf.lastName, pf.position);
 
-        const avatar = req.file
 
         const newPlayer = await PlayerModel.create({
             ...pf,
@@ -147,7 +146,7 @@ export const createPlayer = async (req: Request, res: Response) => {
             email,
             about,
             ageStatus, 
-            avatar: avatar?.path as string
+            // avatar: avatar?.path as string
         });
 
         // Create User
