@@ -121,8 +121,7 @@ export const uploadDocumentFileCTR = async (req: Request, res: Response) => {
 // Delete file from Cloudinary
 export const deleteFileCTR = async (req: Request, res: Response) => {
     try {
-        const { public_id } = req.params;
-        const { resource_type = 'image' } = req.query;
+        const { public_id, resource_type } = req.body;
 
         const result = await cloudinary.uploader.destroy(public_id, {
             resource_type: resource_type as string
@@ -131,7 +130,8 @@ export const deleteFileCTR = async (req: Request, res: Response) => {
         if (result.result === 'ok') {
             res.status(HttpStatusCode.Ok).json({
                 success: true,
-                message: 'File deleted successfully'
+                message: 'File deleted successfully',
+                data: result
             });
         } else {
             res.status(HttpStatusCode.BadRequest).json({

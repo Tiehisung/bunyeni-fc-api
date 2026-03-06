@@ -43,6 +43,6 @@ router.post('/mixed', uploadMixed, async (req, res) => {
 });
 
 // Delete file
-router.delete('/:public_id', deleteFileCTR);
+router.delete('/', deleteFileCTR);
 
 export default router;
