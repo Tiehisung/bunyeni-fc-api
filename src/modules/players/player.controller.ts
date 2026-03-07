@@ -153,7 +153,7 @@ export const createPlayer = async (req: Request, res: Response) => {
         const existingUser = await UserModel.findOne({ email: pf.email });
 
         if (!existingUser) {
-            const password = await bcrypt.hash('kfc', 10);
+            const password = await bcrypt.hash('bunyenifc', 10);
 
             await UserModel.create({
                 email,
