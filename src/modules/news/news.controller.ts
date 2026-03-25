@@ -224,7 +224,9 @@ export const getNewsBySlug = async (req: Request, res: Response) => {
 // POST /api/news
 export const createNews = async (req: Request, res: Response) => {
   try {
-    const { headline, details, reporter, } = req.body as IPostNews;
+    const { headline, details, } = req.body as IPostNews;
+
+    console.log('body', req.body)
 
     // Generate slug from headline
     const slug = slugify(headline.text as string);
@@ -307,7 +309,7 @@ export const updateNews = async (req: Request, res: Response) => {
     const filter = slugIdFilters(slug);
     const body = req.body;
 
- 
+
     // If headline changed, update slug
     if (body.headline?.text) {
       body.slug = slugify(body.headline.text);
@@ -331,7 +333,7 @@ export const updateNews = async (req: Request, res: Response) => {
       filter,
       {
         $set: {
-          ...body, 
+          ...body,
         },
       },
 

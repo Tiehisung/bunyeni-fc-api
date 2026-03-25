@@ -10,7 +10,7 @@ import MatchModel from "../matches/match.model";
 import PlayerModel from "../players/player.model";
 import SquadModel from "./squad.model";
 import { ISquad } from "../../types/squad.interface";
-
+import { LoggerService } from "../../shared/log.service";
 
 // GET /api/squads
 export const getSquads = async (req: Request, res: Response) => {
@@ -48,12 +48,6 @@ export const getSquads = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const squads = await SquadModel.find(cleaned)
-            .populate('match', 'title date competition opponent')
-            .populate('players.player', 'name number position avatar')
-            .populate('coach.id', 'name email avatar')
-            .populate('assistant.id', 'name email avatar')
-            .populate('substitutions.playerIn', 'name number position')
-            .populate('substitutions.playerOut', 'name number position')
             .limit(limit)
             .skip(skip)
             .lean()
@@ -85,12 +79,6 @@ export const getSquadById = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const squad = await SquadModel.findById(id)
-            .populate('match', 'title date competition opponent')
-            .populate('players.player', 'name number position avatar stats')
-            .populate('coach.id', 'name email avatar')
-            .populate('assistant.id', 'name email avatar')
-            .populate('substitutions.playerIn', 'name number position')
-            .populate('substitutions.playerOut', 'name number position')
             .lean();
 
         if (!squad) {
@@ -118,11 +106,6 @@ export const getSquadByMatch = async (req: Request, res: Response) => {
         const { matchId } = req.params;
 
         const squad = await SquadModel.findOne({ match: matchId })
-            .populate('players.player', 'name number position avatar')
-            .populate('coach.id', 'name email avatar')
-            .populate('assistant.id', 'name email avatar')
-            .populate('substitutions.playerIn', 'name number position')
-            .populate('substitutions.playerOut', 'name number position')
             .lean();
 
         if (!squad) {
@@ -208,18 +191,12 @@ export const createSquad = async (req: Request, res: Response) => {
             );
         }
 
-        // Log action
-        await logAction({
-            title: "📋 Squad Created",
-            description: description || `Squad for ${matchDetails.title} on ${formatDate(matchDetails.date)}`,
-            severity: ELogSeverity.INFO,
 
-            meta: {
-                squadId: savedSquad._id,
-                matchId: match._id || match,
-                playerCount: players.length,
-            },
-        });
+        LoggerService.critical(
+            "📋 Squad Created",
+            description || `Squad for ${matchDetails.title} on ${formatDate(matchDetails.date)}`,
+            req
+        )
 
         // Populate for response
         const populatedSquad = await SquadModel.findById(savedSquad._id)
@@ -455,7 +432,7 @@ export const deleteSquad = async (req: Request, res: Response) => {
                 { $unset: { squad: "" } }
             );
         }
- 
+
         // Save to archive
         await saveToArchive(squad, EArchivesCollection.SQUADS, '', req,);
         // Log deletion

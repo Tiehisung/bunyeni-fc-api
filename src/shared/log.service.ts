@@ -64,6 +64,9 @@ export class LoggerService {
     }
 }
 
+
+ 
+
 // Usage:
 // LoggerService.info('User logged in', 'Successfully authenticated', req);
 // LoggerService.error('Payment failed', error.message, req, { orderId: '123' });

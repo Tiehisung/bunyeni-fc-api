@@ -11,21 +11,7 @@ import { saveToArchive } from "../archives/helper";
 import { EArchivesCollection } from "../../types/archive.interface";
 import { hasher } from "../../utils/hasher";
 
-/**
- * 
- *Usage inside controllers:
-
- *const user = me(req);
-
- *console.log(user.id);
-*/
-// export const getMe = (req: Request): IAuthUser => {
-//   if (!("user" in req) || !req.user) {
-//     throw new Error("User not authenticated");
-//   }
-//   return req.user
-// };
-
+ 
 
 // GET /api/users
 export const getUsers = async (req: Request, res: Response) => {

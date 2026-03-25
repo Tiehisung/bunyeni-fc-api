@@ -28,6 +28,8 @@ router.use(authenticate);
 router.route("/:slug")
     .put(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), updatePlayer)
     .patch(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.PLAYER,), patchPlayer)
-    .delete(authorize(EUserRole.SUPER_ADMIN), deletePlayer);
+    .delete(
+        // authorize(EUserRole.SUPER_ADMIN),
+         deletePlayer);
 
 export default router;

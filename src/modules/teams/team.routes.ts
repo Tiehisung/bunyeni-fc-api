@@ -46,7 +46,7 @@ router.route("/:id")
     patchTeam
   )
   .delete(
-    authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
+    // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
     deleteTeam
   );
 
@@ -59,7 +59,7 @@ router.post(
 
 router.delete(
   "/:id/players/:playerId",
-  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
+  // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
   removePlayerFromTeam
 );
 

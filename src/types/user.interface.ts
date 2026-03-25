@@ -19,7 +19,7 @@ export interface IUser {
 export enum EUserRole {
   ADMIN = 'admin',
   SUPER_ADMIN = 'super_admin',
-  GUEST = 'guest',
+  FAN = 'fan',
   PLAYER = 'player',
   COACH = 'coach'
 }
@@ -29,6 +29,22 @@ export enum EUserAccount {
 }
 
 
-
+export interface IFan extends IUser {
+  fanPoints: number;
+  fanBadges: string[];
+  fanRank?: number;
+  engagementScore: number;
+  contributions: {
+    comments: number;
+    shares: number;
+    reactions: number;
+    matchAttendance: number;
+    galleries: number;
+    newsViews: number;
+  };
+  fanSince: Date;
+  lastActive: Date;
+  isFan: boolean;
+}
 
 

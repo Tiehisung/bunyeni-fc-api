@@ -29,7 +29,7 @@ router.post('/', authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,
 // Additional user operations
 router.post(
     "/:slug/change-password",
-    authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, EUserRole.PLAYER, EUserRole.GUEST),
+    authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, EUserRole.PLAYER, EUserRole.FAN),
     changeUserPassword
 );
 

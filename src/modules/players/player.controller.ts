@@ -145,7 +145,7 @@ export const createPlayer = async (req: Request, res: Response) => {
             code: playerCode,
             email,
             about,
-            ageStatus, 
+            ageStatus,
             // avatar: avatar?.path as string
         });
 
@@ -284,14 +284,6 @@ export const deletePlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
         const slug = slugIdFilters(playerId);
-
-        // Check authorization - only SUPER_ADMIN can delete
-        if (req.user?.role !== EUserRole.SUPER_ADMIN) {
-            return res.status(403).json({
-                message: `You are not authorized to perform this action`,
-                success: false,
-            });
-        }
 
         // Find player first
         const player = await PlayerModel.findOne(slug);
