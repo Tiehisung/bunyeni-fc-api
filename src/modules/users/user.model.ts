@@ -1,7 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../../types/user.interface";
-import { generateJwtTokens } from "../../utils/jwt.utils";
 
 export type UserRole = "player" | "coach" | "admin";
 
@@ -16,7 +15,7 @@ const UserSchema = new Schema({
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
     },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: Object.values(EUserRole), default: EUserRole.GUEST },
+    role: { type: String, enum: Object.values(EUserRole), default: EUserRole.FAN },
     emailVerified: { type: Boolean, default: true },
     isActive: {
         type: Boolean,
@@ -36,9 +35,26 @@ const UserSchema = new Schema({
     resetPasswordExpires: {
         type: Date,
         select: false
-    }
+    },
+
+    // New fan fields
+    fanPoints: { type: Number, default: 0 },
+    fanBadges: [{ type: String }],
+    fanRank: { type: Number },
+    engagementScore: { type: Number, default: 0 },
+    contributions: {
+        comments: { type: Number, default: 0 },
+        shares: { type: Number, default: 0 },
+        reactions: { type: Number, default: 0 },
+        matchAttendance: { type: Number, default: 0 },
+        galleries: { type: Number, default: 0 },
+        newsViews: { type: Number, default: 0 }
+    },
+    fanSince: { type: Date, default: Date.now },
+    lastActive: { type: Date, default: Date.now },
+    isFan: { type: Boolean, default: false }
 }, {
-    timestamps: true, 
+    timestamps: true,
 
     //Fine Approach
 

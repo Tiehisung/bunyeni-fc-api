@@ -87,7 +87,8 @@ export const authenticate = async (
 // Role-based authorization
 export const authorize = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        if (!req.user) {
+        console.log('authorized user', req.user)
+        if (!req?.user) {
             return res.status(HttpStatusCode.Unauthorized).json({
                 success: false,
                 message: 'Authentication required'

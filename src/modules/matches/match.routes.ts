@@ -44,7 +44,9 @@ router.patch("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_
 router.delete("/:slug", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN,), deleteMatch);
 
 router.route("/")
-  .post(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), createMatch);
+  .post(
+    // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH, ),
+    createMatch);
 
 // Match event routes
 router.post("/:slug/goals", authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), addGoalToMatch);

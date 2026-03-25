@@ -145,7 +145,7 @@ export const createPlayer = async (req: Request, res: Response) => {
             code: playerCode,
             email,
             about,
-            ageStatus, 
+            ageStatus,
             // avatar: avatar?.path as string
         });
 
@@ -153,7 +153,7 @@ export const createPlayer = async (req: Request, res: Response) => {
         const existingUser = await UserModel.findOne({ email: pf.email });
 
         if (!existingUser) {
-            const password = await bcrypt.hash('kfc', 10);
+            const password = await bcrypt.hash('bunyenifc', 10);
 
             await UserModel.create({
                 email,
@@ -284,14 +284,6 @@ export const deletePlayer = async (req: Request, res: Response) => {
     try {
         const playerId = req.params.slug as string;
         const slug = slugIdFilters(playerId);
-
-        // Check authorization - only SUPER_ADMIN can delete
-        if (req.user?.role !== EUserRole.SUPER_ADMIN) {
-            return res.status(403).json({
-                message: `You are not authorized to perform this action`,
-                success: false,
-            });
-        }
 
         // Find player first
         const player = await PlayerModel.findOne(slug);

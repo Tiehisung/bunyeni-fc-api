@@ -14,6 +14,7 @@ import "../media/files/file.model";
 // GET /api/teams
 export const getTeams = async (req: Request, res: Response) => {
     try {
+        console.log(req?.user)
         const page = Number.parseInt(req.query.page as string || "1", 10);
         const limit = Number.parseInt(req.query.limit as string || "10", 10);
         const skip = (page - 1) * limit;
@@ -72,7 +73,8 @@ export const getTeams = async (req: Request, res: Response) => {
                 limit,
                 total,
                 pages: Math.ceil(total / limit),
-            },
+            }, 
+            // user: req?.user
         });
     } catch (error) {
         res.status(500).json({
@@ -253,6 +255,7 @@ export const updateTeam = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const teamData = req.body;
+        console.log(req?.user)
 
         // Remove _id from updates
         delete teamData._id;

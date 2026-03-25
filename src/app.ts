@@ -34,6 +34,7 @@ import uploadRoutes from './modules/upload/upload.routes';
 import { requestLogger } from './middleware/logger.middleware';
 import { notFound, errorHandler } from './middleware/error-handler.middleware';
 import { ENV } from './config/env.config';
+import { migrateAllCollections } from './data/migration';
 
 // Import middleware
 
@@ -92,6 +93,7 @@ app.use(requestLogger);
 
 // ==================== HEALTH CHECK ====================
 app.get('/health', (req: Request, res: Response) => {
+    console.log(req?.user)
     res.status(200).json({
         status: 'OK',
         timestamp: new Date().toISOString(),
@@ -102,11 +104,19 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
+    console.log(req?.user)
     res.status(200).json({
         message: 'Bunyeni FC API Server',
         version: '1.0.0',
         documentation: '/api/docs',
         health: '/health'
+    });
+});
+app.get('/migrate', async (req: Request, res: Response) => {
+    const collections = await migrateAllCollections()
+    res.status(200).json({
+        message: 'Data migration api',
+        data: collections
     });
 });
 

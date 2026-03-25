@@ -15,7 +15,7 @@ import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
 import PlayerModel from "../../modules/players/player.model";
 import mongoose from "mongoose";
-console.log('Registered models:', mongoose.modelNames());
+ 
 
 
 
@@ -684,7 +684,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-        console.error("Delete match error:", error);
+   
         res.status(500).json({
             message: "Delete failed",
             success: false,
