@@ -113,7 +113,7 @@ app.get('/', (req: Request, res: Response) => {
     });
 });
 app.get('/migrate', async (req: Request, res: Response) => {
-    const collections = await migrateAllCollections()
+    const collections = await migrateAllCollections('mongodb+srv://konjiehifc:konfc@cluster-kfc.7vqlpoe.mongodb.net/kfc-db?appName=Cluster-kfc', ENV.MONGO_URI)
     res.status(200).json({
         message: 'Data migration api',
         data: collections

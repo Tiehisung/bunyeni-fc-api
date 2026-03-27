@@ -21,7 +21,9 @@ export async function migrateAllCollections(source_uri: string = SOURCE_URI, tar
     for (const collectionInfo of collections) {
         const name = collectionInfo.name;
 
-      
+
+        if (name == 'news') {
+
 
 
             console.log(`Migrating collection: ${name}`);
@@ -39,7 +41,7 @@ export async function migrateAllCollections(source_uri: string = SOURCE_URI, tar
             await targetCollection.insertMany(documents);
 
             console.log(`✓ Migrated ${documents.length} documents from ${name}`);
-        
+        }
     }
 
     await sourceConn.close();
