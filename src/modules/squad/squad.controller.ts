@@ -48,6 +48,7 @@ export const getSquads = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const squads = await SquadModel.find(cleaned)
+            .populate('match')
             .limit(limit)
             .skip(skip)
             .lean()
@@ -78,7 +79,7 @@ export const getSquadById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const squad = await SquadModel.findById(id)
+        const squad = await SquadModel.findById(id).populate('match')
             .lean();
 
         if (!squad) {
@@ -105,7 +106,7 @@ export const getSquadByMatch = async (req: Request, res: Response) => {
     try {
         const { matchId } = req.params;
 
-        const squad = await SquadModel.findOne({ match: matchId })
+        const squad = await SquadModel.findOne({ match: matchId }).populate('match')
             .lean();
 
         if (!squad) {
