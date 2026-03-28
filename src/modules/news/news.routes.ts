@@ -9,10 +9,15 @@ import {
     createNews,
     updateNews,
     togglePublishStatus,
-    likeNews,
-    shareNews,
+
     deleteNews,
     getNewsStats,
+
+    updateNewsViews,
+    updateNewsComments,
+    updateNewsShares,
+    updateNewsLikes,
+    deleteNewsComment,
 } from "./news.controller";
 import { authenticate, authorize } from "../../middleware/auth.middleware";
 import { EUserRole } from "../../types/user.interface";
@@ -28,9 +33,14 @@ router.get("/latest", getLatestNews);
 router.get("/category/:category", getNewsByCategory);
 router.get("/:slug", getNewsBySlug);
 
-// Public interaction routes (no auth required)
-router.post("/:slug/like", likeNews);
-router.post("/:slug/share", shareNews);
+
+// View routes
+router.patch("/:newsId/views", updateNewsViews);
+router.patch("/:newsId/comments", updateNewsComments);
+router.patch("/:newsId/shares", updateNewsShares);
+router.patch("/:newsId/likes", updateNewsLikes);  // New like route
+router.delete("/:newsId/comments", deleteNewsComment);   
+router.get("/:newsId/stats", getNewsStats);   
 
 // Protected routes - require authentication
 router.use(authenticate);
@@ -42,9 +52,9 @@ router.route("/")
         createNews
     );
 
-router.route("/:slug")
+router.route("/:newsId")
     .put(
-        authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,),
+        // authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,),
         updateNews
     )
     .delete(
@@ -52,9 +62,12 @@ router.route("/:slug")
         deleteNews
     );
 
+
+
+
 // Publish status toggle
 router.patch(
-    "/:slug/publish",
+    "/:newsId/publish",
     authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH),
     togglePublishStatus
 );

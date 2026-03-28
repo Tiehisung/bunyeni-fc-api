@@ -27,25 +27,16 @@ const newsSchema = new Schema(
     },
     metaDetails: {}, //ISquad etc
 
-    isPublished:Boolean,
+    isPublished: Boolean,
     stats: {
       type: Schema.Types.Mixed,
       default: () => ({ isTrending: true, isLatest: true }),
     },
-    likes: {
-      type: [{ email: String, name: String, date: String, device: String }],
-      default: () => []
-    },
-    comments: {
-      type: [{ name: String, date: String, comment: String, image: String }],
-      default: () => []
-    },
+    likes: [{ user: { type: Schema.Types.ObjectId, ref: "User" }, date: String, device: String }],
+    comments: [{ user: { type: Schema.Types.ObjectId, ref: "User" }, date: String, device: String, comment: String }],
+    views: [{ user: { type: Schema.Types.ObjectId, ref: "User" }, date: String, device: String }],
     shares: {
-      type: [{ email: String, name: String, date: String, device: String }],
-      default: () => []
-    },
-    views: {
-      type: [{ email: String, name: String, date: String, device: String }],
+      type: [{ user: { type: Schema.Types.ObjectId, ref: "User" }, date: String, device: String }],
       default: () => []
     },
 
@@ -58,6 +49,30 @@ const newsSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Virtual for counts
+newsSchema.virtual("likesCount").get(function () {
+  return this.likes?.length || 0;
+});
+
+newsSchema.virtual("commentsCount").get(function () {
+  return this.comments?.length || 0;
+});
+
+newsSchema.virtual("viewsCount").get(function () {
+  return this.views?.length || 0;
+});
+
+newsSchema.virtual("sharesCount").get(function () {
+  return this.shares?.length || 0;
+});
+
+// Indexes for better query performance
+newsSchema.index({ createdAt: -1 });
+newsSchema.index({ tags: 1 });
+newsSchema.index({ type: 1 });
+newsSchema.index({ isPublished: 1 });
+
 
 const NewsModel = mongoose.models.news || mongoose.model("news", newsSchema);
 export default NewsModel;
