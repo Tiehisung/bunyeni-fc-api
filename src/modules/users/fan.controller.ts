@@ -94,11 +94,11 @@ export const updateFanPoints = async (userId: string, action: string) => {
     // Update engagement score
     if (user) {
         const engagementScore = calculateEngagementScore(user);
-        await UserModel.findByIdAndUpdate(userId, { engagementScore });
+        await UserModel.findById(userId, { engagementScore });
     }
 
     // Check for badges
-    await checkAndAwardBadges(userId);
+    await checkAndAwardBadges(user?._id as string);
 
     return user;
 };

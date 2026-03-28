@@ -35,9 +35,9 @@ import { requestLogger } from './middleware/logger.middleware';
 import { notFound, errorHandler } from './middleware/error-handler.middleware';
 import { ENV } from './config/env.config';
 import { migrateAllCollections } from './data/migration';
+import { runUpdate } from './runUpdate';
 
 // Import middleware
-
 
 const app: Application = express();
 
@@ -112,13 +112,14 @@ app.get('/', (req: Request, res: Response) => {
         health: '/health'
     });
 });
-app.get('/migrate', async (req: Request, res: Response) => {
+app.get('/test-api/migrate', async (req: Request, res: Response) => {
     const collections = await migrateAllCollections('mongodb+srv://konjiehifc:konfc@cluster-kfc.7vqlpoe.mongodb.net/kfc-db?appName=Cluster-kfc', ENV.MONGO_URI)
     res.status(200).json({
         message: 'Data migration api',
         data: collections
     });
 });
+app.get('/test-api/update', runUpdate);
 
 //Removes /favicon.ico noisy logs.
 // app.get("/favicon.ico", (_, res) => res.status(204).end());
