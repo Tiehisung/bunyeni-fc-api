@@ -5,7 +5,7 @@ import { IMatch } from "../../types/match.interface";
 import { EPlayerStatus } from "../../types/player.interface";
 import MatchModel from "../matches/match.model";
 import PlayerModel from "../players/player.model";
- 
+
 
 // GET /api/metrics/dashboard
 export const getDashboardMetrics = async (req: Request, res: Response) => {
@@ -210,7 +210,7 @@ export const getPlayerMetrics = async (req: Request, res: Response) => {
             .populate('cards')
             .populate('injuries')
             .populate('mvps')
-            .lean();
+            .lean({ virtuals: true });
 
         if (!player) {
             return res.status(404).json({

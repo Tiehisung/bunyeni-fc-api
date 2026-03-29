@@ -31,7 +31,7 @@ export interface IMatch {
   squad?: ISquad
   competition?: string
 
-//Virtual field
+  //Virtual field
   computed?: {
     teamGoals: IGoal[];
     opponentGoals: IGoal[];
