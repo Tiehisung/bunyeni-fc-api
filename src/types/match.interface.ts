@@ -1,6 +1,6 @@
- 
+
 import { IPlayerMini } from "./player.interface";
- 
+
 import { ICard } from "./card.interface";
 import { IFileProps } from "./file.interface";
 import { ISquad } from "./squad.interface";
@@ -23,13 +23,23 @@ export interface IMatch {
   opponent: ITeam;
   broadcaster?: IFileProps;
   status: EMatchStatus;
-  results: 'win' | 'draw' | 'loss'
   isHome: boolean;
   venue?: { name: string; files: IFileProps[] };
   goals: Array<IGoal>
   events: Array<IMatchEvent>;
   cards: Array<ICard>;
   squad?: ISquad
+  competition?: string
+
+//Virtual field
+  computed?: {
+    teamGoals: IGoal[];
+    opponentGoals: IGoal[];
+    teamScore: number;
+    opponentScore: number;
+    scoreline: string;
+    result: 'win' | 'draw' | 'loss'
+  }
 }
 export interface IMatchMetrics {
   goals: {
@@ -44,7 +54,7 @@ export interface IMatchMetrics {
     away: ITeam;
   }
 }
- 
+
 export interface IMatchEvent {
   title: string,
   description?: string;
@@ -75,7 +85,7 @@ export interface IGoal {
   modeOfScore?: EGoalType
   description?: string
   match: string
-  forKFC: boolean
+  teamId: string
   videoUrl?: string;
 }
 

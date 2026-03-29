@@ -28,11 +28,20 @@ export function getErrorMessage(
     }
   }
 
+
+
   // 4. Zod/Joi/Mongoose validation errors
+
   if (err.details && Array.isArray(err.details) && err.details.length) {
     return err.details.map((d: { message: string }) => d.message).join(", ");
   }
-
+  
+  // Zod v3 errors (ZodError)
+  if (err.name === 'ZodError' && Array.isArray(err.issues)) {
+    return (err.issues as Array<{ message: string }>)
+      .map(i => i.message)
+      .join(', ');
+  }
   // Mongoose validation error
   if (err.name === "ValidationError" && err.errors && typeof err.errors === "object") {
     return Object.values(err.errors)
