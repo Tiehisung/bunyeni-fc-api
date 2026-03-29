@@ -66,12 +66,12 @@ export const getSquads = async (req: Request, res: Response) => {
                 pages: Math.ceil(total / limit),
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to fetch squads"),
+            message: (error.message|| "Failed to fetch squads"),
         });
-    }
+}
 };
 
 // GET /api/squads/:id
@@ -93,12 +93,12 @@ export const getSquadById = async (req: Request, res: Response) => {
             success: true,
             data: squad,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to fetch squad"),
+            message: (error.message|| "Failed to fetch squad"),
         });
-    }
+}
 };
 
 // GET /api/squads/match/:matchId
@@ -120,12 +120,12 @@ export const getSquadByMatch = async (req: Request, res: Response) => {
             success: true,
             data: squad,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to fetch match squad"),
+            message: (error.message|| "Failed to fetch match squad"),
         });
-    }
+}
 };
 
 // POST /api/squads
@@ -134,10 +134,16 @@ export const createSquad = async (req: Request, res: Response) => {
         const { match, players, assistant, coach, description, formation, } = req.body as ISquad;
 
         // Validate required fields
-        if (!match || !players || !players.length) {
+        if (!match  ) {
             return res.status(400).json({
                 success: false,
-                message: "Match ID and players are required",
+                message: "Match is required",
+            });
+        }
+        if ( !players || !players.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Players are required",
             });
         }
 
@@ -200,25 +206,19 @@ export const createSquad = async (req: Request, res: Response) => {
         )
 
         // Populate for response
-        const populatedSquad = await SquadModel.findById(savedSquad._id)
-            .populate('match', 'title date competition opponent')
-            .populate('players.player', 'name number position avatar')
-            .populate('coach.id', 'name email avatar')
-            .populate('assistant.id', 'name email avatar')
-            .lean();
 
         res.status(201).json({
             message: "Squad created successfully!",
             success: true,
-            data: populatedSquad
+            data: savedSquad
         });
 
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
-            message: getErrorMessage(error, "Failed to create squad"),
+            message: (error.message|| "Failed to create squad"),
             success: false,
         });
-    }
+}
 };
 
 // PUT /api/squads/:id
@@ -240,9 +240,8 @@ export const updateSquad = async (req: Request, res: Response) => {
             { new: true, runValidators: true }
         )
             .populate('match', 'title date competition opponent')
-            .populate('players.player', 'name number position avatar')
-            .populate('coach.id', 'name email avatar')
-            .populate('assistant.id', 'name email avatar');
+
+
 
         if (!updated) {
             return res.status(404).json({
@@ -268,12 +267,12 @@ export const updateSquad = async (req: Request, res: Response) => {
             message: "Squad updated successfully",
             data: updated,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to update squad"),
+            message: (error.message|| "Failed to update squad"),
         });
-    }
+}
 };
 
 // PATCH /api/squads/:id/players (add or update players)
@@ -311,12 +310,12 @@ export const updateSquadPlayers = async (req: Request, res: Response) => {
             message: "Squad players updated",
             data: updated,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to update squad players"),
+            message: (error.message|| "Failed to update squad players"),
         });
-    }
+}
 };
 
 // PATCH /api/squads/:id/substitutions (add substitution)
@@ -363,12 +362,12 @@ export const addSubstitution = async (req: Request, res: Response) => {
             message: "Substitution added",
             data: updated,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to add substitution"),
+            message: (error.message|| "Failed to add substitution"),
         });
-    }
+}
 };
 
 // PATCH /api/squads/:id/formation
@@ -400,12 +399,12 @@ export const updateFormation = async (req: Request, res: Response) => {
             message: "Formation updated",
             data: updated,
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to update formation"),
+            message: (error.message|| "Failed to update formation"),
         });
-    }
+}
 };
 
 // DELETE /api/squads/:id
@@ -457,12 +456,12 @@ export const deleteSquad = async (req: Request, res: Response) => {
                 title: squad.title,
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to delete squad"),
+            message: (error.message|| "Failed to delete squad"),
         });
-    }
+}
 };
 
 // GET /api/squads/stats
@@ -531,10 +530,10 @@ export const getSquadStats = async (req: Request, res: Response) => {
                 mostUsedPlayers: stats[0]?.mostUsedPlayers || [],
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: getErrorMessage(error, "Failed to fetch squad statistics"),
+            message: (error.message|| "Failed to fetch squad statistics"),
         });
-    }
+}
 };

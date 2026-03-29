@@ -14,10 +14,6 @@ import { saveToArchive } from "../archives/helper";
 import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
 import PlayerModel from "../../modules/players/player.model";
-import mongoose from "mongoose";
- 
-
-
 
 // GET /api/matches
 export const getMatches = async (req: Request, res: Response) => {
