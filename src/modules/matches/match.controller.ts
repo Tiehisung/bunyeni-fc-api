@@ -86,7 +86,6 @@ export const getMatches = async (req: Request, res: Response) => {
             .populate({ path: "mvp" })
             .limit(limit)
             .skip(skip)
-            .lean({ virtuals: true ,})
             .sort({ date: "desc" });
 
         const total = await MatchModel.countDocuments(cleanedFilters);
@@ -124,7 +123,6 @@ export const getUpcomingMatches = async (req: Request, res: Response) => {
             .populate({ path: "opponent" })
             .sort({ date: "asc" })
             .limit(limit)
-            .lean({ virtuals: true });
 
         res.status(200).json({
             success: true,
@@ -152,7 +150,6 @@ export const getRecentMatches = async (req: Request, res: Response) => {
             .populate({ path: "goals" })
             .sort({ date: "desc" })
             .limit(limit)
-            .lean({ virtuals: true });
 
         res.status(200).json({
             success: true,
@@ -180,7 +177,7 @@ export const getLiveMatch = async (req: Request, res: Response) => {
         }).populate({ path: "opponent", })
             .populate({ path: "squad", })
             .populate({ path: "goals", })
-            .lean({ virtuals: true })
+             
 
         res.status(200).json({
             success: true,
@@ -250,7 +247,6 @@ export const getMatchesBySeason = async (req: Request, res: Response) => {
             .sort({ date: "desc" })
             .skip(skip)
             .limit(limit)
-            .lean({ virtuals: true });
 
         const total = await MatchModel.countDocuments({ season });
 
@@ -506,7 +502,6 @@ export const getMatch = async (req: Request, res: Response) => {
             .populate({ path: "cards", })
             .populate({ path: "injuries", })
             .populate({ path: "mvp" })
-            .lean({ virtuals: true });
 
         if (!match) {
             return res.status(404).json({
@@ -646,7 +641,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
         const filter = slugIdFilters(slug);
 
         // Find and delete the match
-        const deleted = await MatchModel.findOneAndDelete(filter).lean({ virtuals: true });
+        const deleted = await MatchModel.findOneAndDelete(filter) ;
 
         if (!deleted) {
             return res.status(404).json({

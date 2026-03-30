@@ -47,9 +47,9 @@ export const computeMatchResult = (match: IMatch,) => {
     scoreline: `${teamScore} - ${opponentScore}`,
     result:
       teamScore > opponentScore
-        ? "WIN"
+        ? "win"
         : teamScore < opponentScore
-          ? "LOSS"
-          : "DRAW",
+          ? "loss"
+          : "draw",
   };
 };

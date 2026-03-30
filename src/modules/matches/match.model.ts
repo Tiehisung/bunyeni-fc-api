@@ -26,13 +26,12 @@ const matchSchema = new Schema(
     isHome: Boolean,
     events: [{ description: String, title: String, minute: String, modeOfScore: String }],
     mvp: {} //iplayer preferred
-
-
   },
   { timestamps: true ,toJSON: { virtuals: true, }, toObject: { virtuals: true }}
 );
 
-matchSchema.virtual("result").get(function () {
+matchSchema.virtual("computed").get(function () {
+  console.log("VIRTUAL RUNNING", this._id);
   return computeMatchResult(this as any);
 });
 
