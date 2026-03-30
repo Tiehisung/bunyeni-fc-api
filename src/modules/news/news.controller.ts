@@ -684,7 +684,7 @@ export const updateNewsComments = async (req: Request, res: Response) => {
       comment: comment.trim(),
     };
 
-    const added = await NewsModel.findByIdAndUpdate(newsId, { $set: { comments: [newComment, ...(news.comments || [])] } })
+      await NewsModel.findByIdAndUpdate(newsId, { $set: { comments: [newComment, ...(news.comments || [])] } })
 
     // Award points to fan
     if (userId) {

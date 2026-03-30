@@ -5,51 +5,35 @@ import { IMatch } from "../../types/match.interface";
 import { EPlayerStatus } from "../../types/player.interface";
 import MatchModel from "../matches/match.model";
 import PlayerModel from "../players/player.model";
-import { checkMatchMetrics } from "../../lib/compute/match";
- 
+
 
 // GET /api/metrics/dashboard
 export const getDashboardMetrics = async (req: Request, res: Response) => {
     try {
-        // Get all completed matches
         const matches = await MatchModel.find({ status: 'FT' })
             .populate('opponent')
-            .populate('goals')
-            .populate('cards')
-            .populate('injuries')
-            .lean() as IMatch[];
-
-        // Calculate match metrics
-        const matchMetrics = matches?.map(m => checkMatchMetrics(m));
+            .populate('goals') as IMatch[];
 
         const matchStats = {
-            wins: matchMetrics?.filter(m => m?.winStatus === 'win') || [],
-            draws: matchMetrics?.filter(m => m?.winStatus === 'draw') || [],
-            losses: matchMetrics?.filter(m => m?.winStatus === 'loss') || [],
+            wins: matches.filter(m => m.computed?.result === 'win'),
+            draws: matches.filter(m => m.computed?.result === 'draw'),
+            losses: matches.filter(m => m.computed?.result === 'loss'),
         };
 
-        const winRate = matchMetrics?.length > 0
-            ? ((matchStats.wins.length / matchMetrics.length) * 100).toPrecision(3)
+        const winRate = matches.length > 0
+            ? ((matchStats.wins.length / matches.length) * 100).toPrecision(3)
             : '0';
 
-        // Calculate goals
-        const goalsScored = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.kfc?.length || 0), 0) || 0;
+        const goalsScored = matches.reduce((t, m) => t + (m.computed?.teamScore || 0), 0);
+        const goalsConceded = matches.reduce((t, m) => t + (m.computed?.opponentScore || 0), 0);
 
-        const goalsConceded = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.opponent?.length || 0), 0) || 0;
+        const activePlayers = await PlayerModel.countDocuments({ status: EPlayerStatus.CURRENT });
 
-        // Get active players count
-        const activePlayers = await PlayerModel.countDocuments({
-            status: EPlayerStatus.CURRENT
-        });
-
-        // Get recent form (last 5 matches)
-        const recentMatches = matchMetrics?.slice(0, 5).map(m => ({
-            result: m.winStatus,
-            // score: m.score,
-            // opponent: m.opponent,
-        })) || [];
+        const recentForm = matches.slice(0, 5).map(m => ({
+            result: m.computed?.result,
+            scoreline: m.computed?.scoreline,
+            opponent: m.opponent,
+        }));
 
         res.status(200).json({
             success: true,
@@ -59,13 +43,12 @@ export const getDashboardMetrics = async (req: Request, res: Response) => {
                     wins: matchStats.wins.length,
                     draws: matchStats.draws.length,
                     losses: matchStats.losses.length,
-                    totalMatches: matchMetrics.length || 0,
+                    totalMatches: matches.length,
                     winRate: winRate + '%',
                     goalsScored,
                     goalsConceded,
                     goalDifference: goalsScored - goalsConceded,
-                    metrics: matchMetrics,
-                    recentForm: recentMatches,
+                    recentForm,
                 },
             },
         });
@@ -82,31 +65,22 @@ export const getSeasonMetrics = async (req: Request, res: Response) => {
     try {
         const { season } = req.params;
 
-        const matches = await MatchModel.find({
-            status: 'FT',
-            season
-        })
+        const matches = await MatchModel.find({ status: 'FT', season })
             .populate('opponent')
-            .populate('goals')
-            .lean() as IMatch[];
-
-        const matchMetrics = matches?.map(m => checkMatchMetrics(m));
+            .populate('goals') as IMatch[];
 
         const matchStats = {
-            wins: matchMetrics?.filter(m => m?.winStatus === 'win') || [],
-            draws: matchMetrics?.filter(m => m?.winStatus === 'draw') || [],
-            losses: matchMetrics?.filter(m => m?.winStatus === 'loss') || [],
+            wins: matches.filter(m => m.computed?.result === 'win'),
+            draws: matches.filter(m => m.computed?.result === 'draw'),
+            losses: matches.filter(m => m.computed?.result === 'loss'),
         };
 
-        const winRate = matchMetrics?.length > 0
-            ? ((matchStats.wins.length / matchMetrics.length) * 100).toPrecision(3)
+        const winRate = matches.length > 0
+            ? ((matchStats.wins.length / matches.length) * 100).toPrecision(3)
             : '0';
 
-        const goalsScored = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.kfc?.length || 0), 0) || 0;
-
-        const goalsConceded = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.opponent?.length || 0), 0) || 0;
+        const goalsScored = matches.reduce((t, m) => t + (m.computed?.teamScore || 0), 0);
+        const goalsConceded = matches.reduce((t, m) => t + (m.computed?.opponentScore || 0), 0);
 
         res.status(200).json({
             success: true,
@@ -116,12 +90,12 @@ export const getSeasonMetrics = async (req: Request, res: Response) => {
                     wins: matchStats.wins.length,
                     draws: matchStats.draws.length,
                     losses: matchStats.losses.length,
-                    totalMatches: matchMetrics.length || 0,
+                    totalMatches: matches.length,
                     winRate: winRate + '%',
                     goalsScored,
                     goalsConceded,
                     goalDifference: goalsScored - goalsConceded,
-                    metrics: matchMetrics,
+                    matches: matches.map(m => m.computed),
                 },
             },
         });
@@ -138,27 +112,18 @@ export const getHeadToHeadMetrics = async (req: Request, res: Response) => {
     try {
         const { opponentId } = req.params;
 
-        const matches = await MatchModel.find({
-            opponent: opponentId,
-            status: 'FT'
-        })
+        const matches = await MatchModel.find({ opponent: opponentId, status: 'FT' })
             .populate('opponent')
-            .populate('goals')
-            .lean() as IMatch[];
-
-        const matchMetrics = matches?.map(m => checkMatchMetrics(m));
+            .populate('goals') as IMatch[];
 
         const stats = {
-            wins: matchMetrics?.filter(m => m?.winStatus === 'win') || [],
-            draws: matchMetrics?.filter(m => m?.winStatus === 'draw') || [],
-            losses: matchMetrics?.filter(m => m?.winStatus === 'loss') || [],
+            wins: matches.filter(m => m.computed?.result === 'win'),
+            draws: matches.filter(m => m.computed?.result === 'draw'),
+            losses: matches.filter(m => m.computed?.result === 'loss'),
         };
 
-        const goalsScored = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.kfc?.length || 0), 0) || 0;
-
-        const goalsConceded = matchMetrics?.reduce((total, mm) =>
-            total + (mm.goals?.opponent?.length || 0), 0) || 0;
+        const goalsScored = matches.reduce((t, m) => t + (m.computed?.teamScore || 0), 0);
+        const goalsConceded = matches.reduce((t, m) => t + (m.computed?.opponentScore || 0), 0);
 
         res.status(200).json({
             success: true,
@@ -174,13 +139,62 @@ export const getHeadToHeadMetrics = async (req: Request, res: Response) => {
                 goalsScored,
                 goalsConceded,
                 goalDifference: goalsScored - goalsConceded,
-                matches: matchMetrics,
+                matches: matches.map(m => ({ ...m.computed, date: m.date, isHome: m.isHome })),
             },
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: getErrorMessage(error, "Failed to fetch head-to-head metrics"),
+        });
+    }
+};
+
+// GET /api/metrics/trends
+export const getMetricTrends = async (req: Request, res: Response) => {
+    try {
+        const { months = 6 } = req.query;
+        const numMonths = Number(months);
+
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - numMonths);
+
+        const matches = await MatchModel.find({
+            status: 'FT',
+            date: { $gte: startDate }
+        })
+            .populate('goals')
+            .sort({ date: 1 }) as IMatch[];
+
+        const monthlyTrends = matches.reduce((acc: any, match) => {
+            const date = new Date(match.date);
+            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+            if (!acc[monthYear]) {
+                acc[monthYear] = { month: monthYear, matches: 0, wins: 0, draws: 0, losses: 0, goalsScored: 0, goalsConceded: 0 };
+            }
+
+            acc[monthYear].matches++;
+            if (match.computed?.result === 'win') acc[monthYear].wins++;
+            if (match.computed?.result === 'draw') acc[monthYear].draws++;
+            if (match.computed?.result === 'loss') acc[monthYear].losses++;
+            acc[monthYear].goalsScored += match.computed?.teamScore || 0;
+            acc[monthYear].goalsConceded += match.computed?.opponentScore || 0;
+
+            return acc;
+        }, {});
+
+        res.status(200).json({
+            success: true,
+            data: {
+                trends: Object.values(monthlyTrends),
+                period: `${numMonths} months`,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: getErrorMessage(error, "Failed to fetch metric trends"),
         });
     }
 };
@@ -196,7 +210,7 @@ export const getPlayerMetrics = async (req: Request, res: Response) => {
             .populate('cards')
             .populate('injuries')
             .populate('mvps')
-            .lean();
+            .lean({ virtuals: true });
 
         if (!player) {
             return res.status(404).json({
@@ -240,22 +254,16 @@ export const getPlayerMetrics = async (req: Request, res: Response) => {
 // GET /api/metrics/overview
 export const getOverviewMetrics = async (req: Request, res: Response) => {
     try {
-        // Get all completed matches
         const matches = await MatchModel.find({ status: 'FT' })
             .populate('opponent')
-            .populate('goals')
-            .lean() as IMatch[];
+            .populate('goals') as IMatch[];
 
-        const matchMetrics = matches?.map(m => checkMatchMetrics(m));
-
-        // Calculate match statistics
         const matchStats = {
-            wins: matchMetrics?.filter(m => m?.winStatus === 'win') || [],
-            draws: matchMetrics?.filter(m => m?.winStatus === 'draw') || [],
-            losses: matchMetrics?.filter(m => m?.winStatus === 'loss') || [],
+            wins: matches.filter(m => m.computed?.result === 'win'),
+            draws: matches.filter(m => m.computed?.result === 'draw'),
+            losses: matches.filter(m => m.computed?.result === 'loss'),
         };
 
-        // Get player statistics
         const playerStats = await PlayerModel.aggregate([
             {
                 $facet: {
@@ -277,17 +285,9 @@ export const getOverviewMetrics = async (req: Request, res: Response) => {
                                 as: "goalDetails",
                             },
                         },
-                        {
-                            $addFields: {
-                                goalCount: { $size: "$goalDetails" },
-                            },
-                        },
-                        {
-                            $sort: { goalCount: -1 }
-                        },
-                        {
-                            $limit: 5
-                        },
+                        { $addFields: { goalCount: { $size: "$goalDetails" } } },
+                        { $sort: { goalCount: -1 } },
+                        { $limit: 5 },
                         {
                             $project: {
                                 name: { $concat: ["$firstName", " ", "$lastName"] },
@@ -306,17 +306,9 @@ export const getOverviewMetrics = async (req: Request, res: Response) => {
                                 as: "assistDetails",
                             },
                         },
-                        {
-                            $addFields: {
-                                assistCount: { $size: "$assistDetails" },
-                            },
-                        },
-                        {
-                            $sort: { assistCount: -1 }
-                        },
-                        {
-                            $limit: 5
-                        },
+                        { $addFields: { assistCount: { $size: "$assistDetails" } } },
+                        { $sort: { assistCount: -1 } },
+                        { $limit: 5 },
                         {
                             $project: {
                                 name: { $concat: ["$firstName", " ", "$lastName"] },
@@ -354,67 +346,6 @@ export const getOverviewMetrics = async (req: Request, res: Response) => {
         res.status(500).json({
             success: false,
             message: getErrorMessage(error, "Failed to fetch overview metrics"),
-        });
-    }
-};
-
-// GET /api/metrics/trends
-export const getMetricTrends = async (req: Request, res: Response) => {
-    try {
-        const { months = 6 } = req.query;
-        const numMonths = Number(months);
-
-        const startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - numMonths);
-
-        const matches = await MatchModel.find({
-            status: 'FT',
-            date: { $gte: startDate }
-        })
-            .populate('goals')
-            .sort({ date: 1 })
-            .lean() as IMatch[];
-
-        // Group by month
-        const monthlyTrends = matches.reduce((acc: any, match) => {
-            const date = new Date(match.date);
-            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-            if (!acc[monthYear]) {
-                acc[monthYear] = {
-                    month: monthYear,
-                    matches: 0,
-                    wins: 0,
-                    draws: 0,
-                    losses: 0,
-                    goalsScored: 0,
-                    goalsConceded: 0,
-                };
-            }
-
-            const metrics = checkMatchMetrics(match);
-
-            acc[monthYear].matches++;
-            if (metrics.winStatus === 'win') acc[monthYear].wins++;
-            if (metrics.winStatus === 'draw') acc[monthYear].draws++;
-            if (metrics.winStatus === 'loss') acc[monthYear].losses++;
-            acc[monthYear].goalsScored += metrics.goals?.kfc?.length || 0;
-            acc[monthYear].goalsConceded += metrics.goals?.opponent?.length || 0;
-
-            return acc;
-        }, {});
-
-        res.status(200).json({
-            success: true,
-            data: {
-                trends: Object.values(monthlyTrends),
-                period: `${numMonths} months`,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: getErrorMessage(error, "Failed to fetch metric trends"),
         });
     }
 };

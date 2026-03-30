@@ -19,13 +19,20 @@ export const ENV = {
     COOKIE_SECURE: true,  // Set to true in production(requires HTTPS)
     RATE_LIMIT_WINDOW: 900000,  // 15 minutes in ms
     RATE_LIMIT_MAX: 100,  // requests per window
+
+    //Cloudinary
     CLOUDINARY: {
-        NAME: 'djzfztrig',
-        KEY: '816511478531121',
-        SECRET: 'jaPifLrfNYyxzb0V17TG-4nXTQU',
-        URL: 'cloudinary://816511478531121:jaPifLrfNYyxzb0V17TG-4nXTQU@djzfztrig'
+        NAME: env.CLOUD_NAME as string,
+        KEY: env.CLOUD_API_KEY as string,
+        SECRET: env.CLOUD_API_SECRET as string,
     },
-    CLOUDINARY_CLOUD_NAME: 'djzfztrig',
-    CLOUDINARY_API_KEY: '816511478531121',
-    CLOUDINARY_API_SECRET: 'jaPifLrfNYyxzb0V17TG-4nXTQU'
+
+    //Team
+    TEAM: {
+        ID: env.TEAM_ID as string ,// Example ObjectId for the team
+        NAME: env.TEAM_NAME as string,
+        ALIAS: env.TEAM_ALIAS as string,
+        SHORT_NAME: env.TEAM_SHORT_NAME as string,
+        TAGLINE: env.TEAM_TAGLINE as string,
+    }
 };

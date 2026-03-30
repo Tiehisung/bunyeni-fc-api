@@ -14,10 +14,6 @@ import { saveToArchive } from "../archives/helper";
 import { logAction } from "../log/helper";
 import MatchModel, { IPostMatch } from "./match.model";
 import PlayerModel from "../../modules/players/player.model";
-import mongoose from "mongoose";
- 
-
-
 
 // GET /api/matches
 export const getMatches = async (req: Request, res: Response) => {
@@ -90,7 +86,6 @@ export const getMatches = async (req: Request, res: Response) => {
             .populate({ path: "mvp" })
             .limit(limit)
             .skip(skip)
-            .lean()
             .sort({ date: "desc" });
 
         const total = await MatchModel.countDocuments(cleanedFilters);
@@ -128,7 +123,6 @@ export const getUpcomingMatches = async (req: Request, res: Response) => {
             .populate({ path: "opponent" })
             .sort({ date: "asc" })
             .limit(limit)
-            .lean();
 
         res.status(200).json({
             success: true,
@@ -156,7 +150,6 @@ export const getRecentMatches = async (req: Request, res: Response) => {
             .populate({ path: "goals" })
             .sort({ date: "desc" })
             .limit(limit)
-            .lean();
 
         res.status(200).json({
             success: true,
@@ -184,7 +177,7 @@ export const getLiveMatch = async (req: Request, res: Response) => {
         }).populate({ path: "opponent", })
             .populate({ path: "squad", })
             .populate({ path: "goals", })
-            .lean()
+             
 
         res.status(200).json({
             success: true,
@@ -254,7 +247,6 @@ export const getMatchesBySeason = async (req: Request, res: Response) => {
             .sort({ date: "desc" })
             .skip(skip)
             .limit(limit)
-            .lean();
 
         const total = await MatchModel.countDocuments({ season });
 
@@ -510,7 +502,6 @@ export const getMatch = async (req: Request, res: Response) => {
             .populate({ path: "cards", })
             .populate({ path: "injuries", })
             .populate({ path: "mvp" })
-            .lean();
 
         if (!match) {
             return res.status(404).json({
@@ -650,7 +641,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
         const filter = slugIdFilters(slug);
 
         // Find and delete the match
-        const deleted = await MatchModel.findOneAndDelete(filter).lean();
+        const deleted = await MatchModel.findOneAndDelete(filter) ;
 
         if (!deleted) {
             return res.status(404).json({

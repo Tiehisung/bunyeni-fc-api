@@ -26,7 +26,7 @@ export const goalSchema = new Schema(
     type: String,
     description: String,
     modeOfScore: { type: String, default: () => EGoalType.UNKNOWN, enum: Object.values(EGoalType) },
-    forKFC: { type: Boolean, default: () => false }
+    teamId: { type: Schema.Types.ObjectId, ref: "teams" }
   },
   { timestamps: true }
 );

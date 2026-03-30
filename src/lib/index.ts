@@ -1,55 +1,19 @@
 
 
-export function getErrorMessage(
-  error: unknown,
-  customMessage?: string
-): string {
+export function getErrorMessage(error: unknown, fallback?: string): string {
   if (!error) return "Unknown error occurred";
-
   const err = error as Record<string, unknown>;
 
-  // 1. Fetch-based API errors
-  if (error instanceof Response) {
-    return `Request failed: ${error.status} ${error.statusText}`;
-  }
-
-  // 2. Server returned structured JSON { error, message }
-  if (err.error && typeof err.error === "string") return err.error;
-
-  if (err.message && typeof err.message === "string") return err.message;
-
-  // 3. Axios errors
-  if (err.response && typeof err.response === "object") {
-    const response = err.response as Record<string, unknown>;
-    if (response.data && typeof response.data === "object") {
-      const data = response.data as Record<string, unknown>;
-      if (data.message && typeof data.message === "string") return data.message;
-      if (data.error && typeof data.error === "string") return data.error;
-    }
-  }
-
-  // 4. Zod/Joi/Mongoose validation errors
-  if (err.details && Array.isArray(err.details) && err.details.length) {
-    return err.details.map((d: { message: string }) => d.message).join(", ");
-  }
-
-  // Mongoose validation error
-  if (err.name === "ValidationError" && err.errors && typeof err.errors === "object") {
+  if (err.name === "ValidationError" && err.errors) {
     return Object.values(err.errors)
-      .map((e: { message: string }) => e.message)
+      .map((e: any) => e.message)
       .join(", ");
   }
 
-  // 5. Network errors
-  if (err.name === "NetworkError") {
-    return "Network error — please check your connection.";
-  }
-
-  // 6. String errors
+  if (err.message && typeof err.message === "string") return err.message;
   if (typeof error === "string") return error;
 
-  // 7. Default fallback
-  return customMessage ?? "Something went wrong. Please try again.";
+  return fallback ?? "Something went wrong";
 }
 
 export const createFileUrl = (file: File) => URL.createObjectURL(file);

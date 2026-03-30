@@ -166,7 +166,7 @@ export const getGoalsByPlayer = async (req: Request, res: Response) => {
 // POST /api/goals
 export const createGoal = async (req: Request, res: Response) => {
   try {
-    const { match, description, minute, scorer, assist, modeOfScore, forKFC } = req.body as IPostGoal;
+    const { match, description, minute, scorer, assist, modeOfScore, teamId } = req.body as IPostGoal;
 
     // Validate required fields
     if (!match || !minute) {
@@ -184,7 +184,7 @@ export const createGoal = async (req: Request, res: Response) => {
       scorer,
       assist,
       modeOfScore,
-      forKFC,
+      teamId,
       createdBy: req?.user?._id,
       createdAt: new Date(),
     });
@@ -204,7 +204,7 @@ export const createGoal = async (req: Request, res: Response) => {
     );
 
     // Update Player statistics
-    if (forKFC && scorer) {
+    if (scorer) {
       // Add goal to scorer
       await PlayerModel.findByIdAndUpdate(
         scorer?._id,
