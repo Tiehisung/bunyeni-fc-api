@@ -30,6 +30,7 @@ import logRoutes from './modules/log/logs.routes';
 import archiveRoutes from './modules/archives/archive.route';
 import metricRoutes from './modules/metrics/metrics.routes';
 import authRoutes from './modules/auth/auth.routes';
+import searchRoutes from './modules/search/search.routes';
 import uploadRoutes from './modules/upload/upload.routes';
 import { requestLogger } from './middleware/logger.middleware';
 import { notFound, errorHandler } from './middleware/error-handler.middleware';
@@ -154,6 +155,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/archives', archiveRoutes);
 app.use('/api/metrics', metricRoutes);
+app.use('/api/search', searchRoutes);
 // app.use('/api/clubs', clubRoutes);
 
 // ==================== ERROR HANDLING ====================
