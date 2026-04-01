@@ -166,7 +166,7 @@ export class SearchController {
                     title: `${player.firstName} ${player.lastName}`,
                     description: `${player.position} | #${player.number} | Team ${player.training?.team || "N/A"}`,
                     image: player.avatar,
-                    url: basePath ? `${basePath}/players/${player._id}` : `/players/details?playerId=${player._id}`,
+                    url: basePath ? `${basePath}/players/${player.slug}` : `/players/details?playerId=${player.slug}`,
                     date: player.createdAt,
                     relevance,
                     metadata: {
@@ -422,8 +422,8 @@ export class SearchController {
                 ...players.map(p => ({
                     type: "player",
                     label: `${p.firstName} ${p.lastName}`,
-                    value: p.code,
-                    url: basePath ? `${basePath}/players/${p.code}` : `/players/details?playerId=${p._id}`,
+                    value: p.slug,
+                    url: basePath ? `${basePath}/players/${p.slug}` : `/players/details?playerId=${p._id}`,
                     image: p.avatar,
                     subtitle: p.position
                 })),
@@ -464,13 +464,13 @@ const getQueryString = (param: any): string | undefined => {
 };
 
 // Helper function to safely parse date
-const safeParseDate = (dateString?: string): Date | undefined => {
-    if (!dateString) return undefined;
+// const safeParseDate = (dateString?: string): Date | undefined => {
+//     if (!dateString) return undefined;
 
-    const parsed = new Date(dateString);
-    if (isNaN(parsed.getTime())) {
-        console.warn(`Invalid date format: ${dateString}`);
-        return undefined;
-    }
-    return parsed;
-};
+//     const parsed = new Date(dateString);
+//     if (isNaN(parsed.getTime())) {
+//         console.warn(`Invalid date format: ${dateString}`);
+//         return undefined;
+//     }
+//     return parsed;
+// };
