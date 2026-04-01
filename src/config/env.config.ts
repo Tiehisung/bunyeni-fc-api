@@ -17,8 +17,8 @@ export const ENV = {
     JWT_ISSUER: 'bunyeni-fc-api',
     JWT_AUDIENCE: 'bunyeni-fc-client',
     COOKIE_SECURE: true,  // Set to true in production(requires HTTPS)
-    RATE_LIMIT_WINDOW: 900000,  // 15 minutes in ms
-    RATE_LIMIT_MAX: 100,  // requests per window
+    RATE_LIMIT_WINDOW: env.RATE_LIMIT_WINDOW ? parseInt(env.RATE_LIMIT_WINDOW) : 3600000,  // 15 minutes in ms
+    RATE_LIMIT_MAX: env.RATE_LIMIT_MAX ? parseInt(env.RATE_LIMIT_MAX) : 100,  // requests per window
 
     //Cloudinary
     CLOUDINARY: {
