@@ -4,7 +4,6 @@ import { getErrorMessage } from "../../../lib";
 import PlayerModel from "../../players/player.model";
 import MatchModel from "../match.model";
 import GoalModel, { IPostGoal } from "./goals.model";
-import { ELogSeverity } from "../../../types/log.interface";
 import { LoggerService } from "../../../shared/log.service";
 
 // GET /api/goals
@@ -200,7 +199,7 @@ export const createGoal = async (req: Request, res: Response) => {
     const updatedMatch = await MatchModel.findByIdAndUpdate(
       match,
       { $push: { goals: savedGoal._id } },
-      { new: true }
+     
     );
 
     // Update Player statistics
