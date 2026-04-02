@@ -1,25 +1,15 @@
-//modules/og/og.routes.ts
+// server/modules/og/og.routes.ts
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
-import { getMatchMeta, getPlayerMeta } from "./og.controller";
-
-const ogLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 30, // 30 requests per minute
-});
-
-
+import { getPlayerOg, getMatchOg, getDefaultOg } from "./og.controller";
 
 const router = Router();
 
-// router.get("/default", getDefault);
-router.get("/player/:id", getPlayerMeta);
-router.get("/match/:id", ogLimiter, getMatchMeta);
-// router.get("/news/:id", getNewsme);
-// router.post("/clear-cache", clearOgCache);
+// These return PNG images for social media previews
+router.get("/default", getDefaultOg);
+router.get("/player/:id", getPlayerOg);
+router.get("/match/:id", getMatchOg);
 
 export default router;
- 
 // import { Request, Response, Router } from "express";
 // import MatchModel from "../matches/match.model";
 // import PlayerModel from "../players/player.model";

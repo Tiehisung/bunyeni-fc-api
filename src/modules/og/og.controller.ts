@@ -1,97 +1,103 @@
-// modules/seo/seo.controller.ts
+// server/modules/og/og.controller.ts
 import { Request, Response } from "express";
-import PlayerModel from "../players/player.model";
 import MatchModel from "../matches/match.model";
+import PlayerModel from "../players/player.model";
+import NewsModel from "../news/news.model";
+import { generateOgImage } from "./og.service";
 
-export const getPlayerMeta = async (req: Request, res: Response) => {
+const ogCache = new Map<string, Buffer>();
+
+export const getPlayerOg = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const player = await PlayerModel.findById(id).lean();
+        const cacheKey = `player-${id}`;
 
-        if (!player) {
-            return res.status(404).send("Player not found");
+        if (ogCache.has(cacheKey)) {
+            res.setHeader("Content-Type", "image/png");
+            return res.send(ogCache.get(cacheKey));
         }
 
-        const name = `${player.firstName} ${player.lastName}`;
-        const ogImageUrl = `${process.env.API_URL}/og/player/${id}`;
-        const frontendUrl = `${process.env.FRONTEND_URL}/players/details?playerId=${id}`;
+        const player = await PlayerModel.findById(id).lean();
+        if (!player) {
+            return res.status(404).json({ success: false, message: "Player not found" });
+        }
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>${name} | ${process.env.APP_NAME}</title>
-    <meta name="description" content="Player profile for ${name}. ${player.position} wearing jersey #${player.number}.">
-    
-    <meta property="og:title" content="${name}">
-    <meta property="og:description" content="Player profile for ${name}">
-    <meta property="og:image" content="${ogImageUrl}">
-    <meta property="og:url" content="${frontendUrl}">
-    <meta property="og:type" content="profile">
-    
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${name}">
-    <meta name="twitter:description" content="Player profile for ${name}">
-    <meta name="twitter:image" content="${ogImageUrl}">
-    
-    <meta http-equiv="refresh" content="0; url=${frontendUrl}">
-</head>
-<body>
-    <script>window.location.href = "${frontendUrl}";</script>
-</body>
-</html>
-        `;
+        const image = await generateOgImage({
+            title: `${player.firstName} ${player.lastName}`,
+            subtitle: `${player.position} • ${process.env.APP_NAME}`,
+            imageUrl: player.avatar,
+            type: "player",
+        });
 
-        res.setHeader("Content-Type", "text/html");
-        res.send(html);
+        ogCache.set(cacheKey, image);
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.send(image);
     } catch (error) {
-        res.status(500).send("Error generating meta tags");
+        console.error("Player OG error:", error);
+        res.status(500).send("Failed to generate OG image");
     }
 };
 
-export const getMatchMeta = async (req: Request, res: Response) => {
+export const getMatchOg = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const match = await MatchModel.findById(id).populate("opponent").lean();
+        const cacheKey = `match-${id}`;
 
-        if (!match) {
-            return res.status(404).send("Match not found");
+        if (ogCache.has(cacheKey)) {
+            res.setHeader("Content-Type", "image/png");
+            return res.send(ogCache.get(cacheKey));
         }
 
-        const ogImageUrl = `${process.env.API_URL}/og/match/${id}`;
-        const frontendUrl = `${process.env.FRONTEND_URL}/matches/${match.slug || id}`;
+        const match = await MatchModel.findById(id).populate("opponent").lean();
+        if (!match) {
+            return res.status(404).json({ success: false, message: "Match not found" });
+        }
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>${match.title} | ${process.env.APP_NAME}</title>
-    <meta name="description" content="${match.title} match. ${match.computed?.teamScore || 0} - ${match.computed?.opponentScore || 0}">
-    
-    <meta property="og:title" content="${match.title}">
-    <meta property="og:description" content="Match result: ${match.computed?.teamScore || 0} - ${match.computed?.opponentScore || 0}">
-    <meta property="og:image" content="${ogImageUrl}">
-    <meta property="og:url" content="${frontendUrl}">
-    <meta property="og:type" content="website">
-    
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${match.title}">
-    <meta name="twitter:description" content="Match result: ${match.computed?.teamScore || 0} - ${match.computed?.opponentScore || 0}">
-    <meta name="twitter:image" content="${ogImageUrl}">
-    
-    <meta http-equiv="refresh" content="0; url=${frontendUrl}">
-</head>
-<body>
-    <script>window.location.href = "${frontendUrl}";</script>
-</body>
-</html>
-        `;
+        const teamScore = match.computed?.teamScore || 0;
+        const opponentScore = match.computed?.opponentScore || 0;
+        const resultText = match.status === "FT"
+            ? `${teamScore} - ${opponentScore}`
+            : match.status === "LIVE"
+                ? "LIVE NOW"
+                : "UPCOMING";
 
-        res.setHeader("Content-Type", "text/html");
-        res.send(html);
+        const image = await generateOgImage({
+            title: match.title || `vs ${(match.opponent as any)?.name}`,
+            subtitle: `${match.date} • ${resultText}`,
+            type: "match",
+        });
+
+        ogCache.set(cacheKey, image);
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.send(image);
     } catch (error) {
-        res.status(500).send("Error generating meta tags");
+        console.error("Match OG error:", error);
+        res.status(500).send("Failed to generate OG image");
+    }
+};
+
+export const getDefaultOg = async (req: Request, res: Response) => {
+    try {
+        const cacheKey = "default";
+
+        if (ogCache.has(cacheKey)) {
+            res.setHeader("Content-Type", "image/png");
+            return res.send(ogCache.get(cacheKey));
+        }
+
+        const image = await generateOgImage({
+            title: process.env.APP_NAME!,
+            subtitle: process.env.APP_TAGLINE,
+            type: "default",
+        });
+
+        ogCache.set(cacheKey, image);
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.send(image);
+    } catch (error) {
+        res.status(500).send("Failed to generate OG image");
     }
 };

@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import { ENV } from './config/env.config';
+import { migrateAllCollections } from './data/migration';
 
 // Import routes
 import userRoutes from './modules/users/user.routes';
@@ -34,10 +36,9 @@ import searchRoutes from './modules/search/search.routes';
 import uploadRoutes from './modules/upload/upload.routes';
 import { requestLogger } from './middleware/logger.middleware';
 import { notFound, errorHandler } from './middleware/error-handler.middleware';
-import { ENV } from './config/env.config';
-import { migrateAllCollections } from './data/migration';
 import { runUpdate } from './runUpdate';// server/app.ts
 import ogRoutes from "./modules/og/og.routes";
+import seoRoutes from "./modules/seo/seo.routes";
 
 // Import middleware
 
@@ -157,7 +158,9 @@ app.use('/api/logs', logRoutes);
 app.use('/api/archives', archiveRoutes);
 app.use('/api/metrics', metricRoutes);
 app.use('/api/search', searchRoutes);
-app.use("/seo", ogRoutes);
+app.use("/api/og", ogRoutes);    // Returns PNG images
+app.use("/seo", seoRoutes);       // Returns HTML with meta tags
+
 
 // ==================== ERROR HANDLING ====================
 // 404 handler
