@@ -157,7 +157,7 @@ app.use('/api/logs', logRoutes);
 app.use('/api/archives', archiveRoutes);
 app.use('/api/metrics', metricRoutes);
 app.use('/api/search', searchRoutes);
-app.use("/api", ogRoutes);
+app.use("/seo", ogRoutes);
 
 // ==================== ERROR HANDLING ====================
 // 404 handler

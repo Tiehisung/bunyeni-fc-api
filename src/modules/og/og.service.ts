@@ -1,4 +1,4 @@
-// server/modules/og/og.service.ts
+//modules/og/og.service.ts
 import { createCanvas, loadImage } from "canvas";
 
 interface OgImageOptions {

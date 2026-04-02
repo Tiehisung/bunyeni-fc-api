@@ -1,7 +1,7 @@
-// server/modules/og/og.routes.ts
+//modules/og/og.routes.ts
 import { Router } from "express";
-import { getDefaultOg, getPlayerOg, getMatchOg, getNewsOg, clearOgCache } from "./og.controller";
 import rateLimit from "express-rate-limit";
+import { getMatchMeta, getPlayerMeta } from "./og.controller";
 
 const ogLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
@@ -12,15 +12,14 @@ const ogLimiter = rateLimit({
 
 const router = Router();
 
-router.get("/default", getDefaultOg);
-router.get("/player/:id", getPlayerOg);
-router.get("/match/:id", ogLimiter, getMatchOg);
-router.get("/news/:id", getNewsOg);
-router.post("/clear-cache", clearOgCache);
+// router.get("/default", getDefault);
+router.get("/player/:id", getPlayerMeta);
+router.get("/match/:id", ogLimiter, getMatchMeta);
+// router.get("/news/:id", getNewsme);
+// router.post("/clear-cache", clearOgCache);
 
 export default router;
-
-// // server/routes/og.routes.ts
+ 
 // import { Request, Response, Router } from "express";
 // import MatchModel from "../matches/match.model";
 // import PlayerModel from "../players/player.model";
