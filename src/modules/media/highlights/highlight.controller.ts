@@ -4,6 +4,7 @@ import { removeEmptyKeys, getErrorMessage } from "../../../lib";
 import { formatDate } from "../../../lib/timeAndDate";
 import { logAction } from "../../log/helper";
 import HighlightModel, { IPostHighlight } from "./highlight.model";
+import { getOptimizedThumbnail, } from "../../../utils/cloudinary.util";
 
 
 
@@ -173,11 +174,11 @@ export const createHighlight = async (req: Request, res: Response) => {
         message: "Highlight title is required",
       });
     }
-
     // Create highlight
     const savedHighlight = await HighlightModel.create({
       match,
       ...others,
+       thumbnail_url: getOptimizedThumbnail(others?.public_id as string, { resourceType: others.resource_type as 'image' | 'video', width: 400, height: 225, crop: "fill" }),
       createdBy: req.user?._id,
       createdAt: new Date(),
       updatedAt: new Date(),

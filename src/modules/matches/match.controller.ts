@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 //For populating related data, you can import other models as needed
 import '../../shared/models.imports'
 
-import { removeEmptyKeys, slugify } from "../../lib";
+import { getErrorMessage, removeEmptyKeys, slugify } from "../../lib";
 import { slugIdFilters } from "../../lib/slug";
 import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
@@ -177,7 +177,7 @@ export const getLiveMatch = async (req: Request, res: Response) => {
         }).populate({ path: "opponent", })
             .populate({ path: "squad", })
             .populate({ path: "goals", })
-             
+
 
         res.status(200).json({
             success: true,
@@ -496,7 +496,7 @@ export const getMatch = async (req: Request, res: Response) => {
         const filter = slugIdFilters(slug);
 
         const match = await MatchModel.findOne(filter)
-            .populate({ path: "opponent",  })
+            .populate({ path: "opponent", })
             .populate({ path: "goals", })
             .populate({ path: "squad", })
             .populate({ path: "cards", })
@@ -545,7 +545,7 @@ export const updateMatch = async (req: Request, res: Response) => {
             },
             { new: true, runValidators: true }
         )
-            .populate({ path: "opponent",   })
+            .populate({ path: "opponent", })
             .populate({ path: "goals" })
             .populate({ path: "squad" });
 
@@ -607,11 +607,7 @@ export const patchMatch = async (req: Request, res: Response) => {
                     // updatedBy: req.user?.id,
                 }
             },
-            { new: true, runValidators: true }
         )
-            .populate({ path: "opponent",   })
-            .populate({ path: "goals" })
-            .populate({ path: "squad" });
 
         if (!updated) {
             return res.status(404).json({
@@ -627,9 +623,9 @@ export const patchMatch = async (req: Request, res: Response) => {
         });
     } catch (error) {
         res.status(500).json({
-            message: "Update failed",
+            message: getErrorMessage(error),
             success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
+            error,
         });
     }
 };
@@ -641,7 +637,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
         const filter = slugIdFilters(slug);
 
         // Find and delete the match
-        const deleted = await MatchModel.findOneAndDelete(filter) ;
+        const deleted = await MatchModel.findOneAndDelete(filter);
 
         if (!deleted) {
             return res.status(404).json({
@@ -675,7 +671,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-   
+
         res.status(500).json({
             message: "Delete failed",
             success: false,

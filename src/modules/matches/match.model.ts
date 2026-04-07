@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { EMatchStatus, IMatch } from "../../types/match.interface";
+import { EMatchStatus,   } from "../../types/match.interface";
 import { computeMatchResult } from "./helpers";
 
 const matchSchema = new Schema(
@@ -25,17 +25,18 @@ const matchSchema = new Schema(
     competition: { type: String, default: () => 'Friendly Match' },
     isHome: Boolean,
     events: [{ description: String, title: String, minute: String, modeOfScore: String }],
-    mvp: {} //iplayer preferred
+    mvp: {},//iplayer preferred
+    fixtureFlier: String,
+    resultFlier: String,
   },
-  { timestamps: true ,toJSON: { virtuals: true, }, toObject: { virtuals: true }}
+  { timestamps: true, toJSON: { virtuals: true, }, toObject: { virtuals: true } }
 );
 
 matchSchema.virtual("computed").get(function () {
-  console.log("VIRTUAL RUNNING", this._id);
   return computeMatchResult(this as any);
 });
 
- 
+
 
 const MatchModel =
   mongoose.models.matches || mongoose.model("matches", matchSchema);

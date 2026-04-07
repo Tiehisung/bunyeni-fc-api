@@ -1,5 +1,5 @@
 
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const docSchema = new mongoose.Schema(
     {
@@ -18,7 +18,7 @@ export const docSchema = new mongoose.Schema(
         height: Number,
         tags: { type: [String], default: () => [] },
         //Essential
-        folder: { type: String, required: true, default: 'others' },
+        folder: { type: Schema.Types.ObjectId, ref: "folders", },
     },
     { timestamps: true }
 );

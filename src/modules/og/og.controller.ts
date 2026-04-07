@@ -2,7 +2,6 @@
 import { Request, Response } from "express";
 import MatchModel from "../matches/match.model";
 import PlayerModel from "../players/player.model";
-import NewsModel from "../news/news.model";
 import { generateOgImage } from "./og.service";
 
 const ogCache = new Map<string, Buffer>();
