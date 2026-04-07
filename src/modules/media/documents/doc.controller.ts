@@ -1,7 +1,7 @@
 // controllers/document.controller.ts
 import { Request, Response } from "express";
 import { Document } from "mongoose";
-import { removeEmptyKeys, getErrorMessage } from "../../../lib";
+import { removeEmptyKeys, getErrorMessage, } from "../../../lib";
 import { TSearchKey } from "../../../types";
 import { IDocFile } from "../../../types/doc";
 import { ELogSeverity } from "../../../types/log.interface";
@@ -10,6 +10,7 @@ import { logAction } from "../../log/helper";
 import DocModel from "./doc.model";
 import FolderModel, { IPostFolder } from "./folder.model";
 import { EUserRole } from "../../../types/user.interface";
+import { LoggerService } from "../../../shared/log.service";
 
 // ==================== MAIN DOCUMENT CONTROLLERS ====================
 
@@ -27,9 +28,7 @@ export const getDocuments = async (req: Request, res: Response) => {
 
         const query: any = {
             $or: [
-                { "name": regex },
                 { "original_filename": regex },
-                { "folder": regex },
                 { "description": regex },
                 { "tags": regex },
             ],
@@ -46,7 +45,8 @@ export const getDocuments = async (req: Request, res: Response) => {
         const cleaned = removeEmptyKeys(query);
 
         const documents = await DocModel.find(cleaned)
-            .sort({ createdAt: 'desc' })
+            .populate('folder',)
+            .sort({ updatedAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
@@ -76,7 +76,7 @@ export const getDocumentById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const document = await DocModel.findById(id).lean();
+        const document = await DocModel.findById(id).populate('folder', 'name docsCount').lean();
 
         if (!document) {
             return res.status(404).json({
@@ -98,38 +98,56 @@ export const getDocumentById = async (req: Request, res: Response) => {
 };
 
 // POST /api/documents
-export const createDocument = async (req: Request, res: Response) => {
+export const createDocuments = async (req: Request, res: Response) => {
     try {
-        const { file, folder, format, tags } = req.body;
+        const { files, folderId } = req.body
 
-        const doc = await DocModel.create({
-            ...file,
-            tags,
-            folder,
-            format,
-            createdBy: req.user?._id,
-            createdAt: new Date(),
-        });
+        if (!Array.isArray(files) || files.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No documents provided for upload",
+            });
+        }
 
-        // Push to folder
-        await FolderModel.findOneAndUpdate(
-            { name: folder },
-            { $addToSet: { documents: (doc as Document)?._id } },
-            { upsert: true }
-        );
+
+        let destinationFolderId = folderId
+        if (!folderId) {
+            let othersFolder = await FolderModel.findOne({
+                $or: [{ name: 'others' }, { name: 'Others' }],
+            });//As default folder
+
+            if (!othersFolder) {
+                othersFolder = await FolderModel.create({ name: 'others', isDefault: true })
+            }
+
+            destinationFolderId = othersFolder._id
+        }
+
+
+        const createdDocs: Document[] = [];
+        for (const df of files) {
+            const createdDoc = await DocModel.create({
+                ...df, folder: destinationFolderId
+            });
+
+
+            // Push to folder
+            await FolderModel.findByIdAndUpdate(
+                destinationFolderId,
+                { $addToSet: { documents: createdDoc._id } },
+                { upsert: true }
+            );
+
+            createdDocs.push(createdDoc);
+        }
 
         // Log action
-        await logAction({
-            title: `Document uploaded to - ${folder}`,
-            description: `${file.name ?? file.original_filename} uploaded on ${Date.now()}`,
-            severity: ELogSeverity.INFO,
-            meta: { documentId: doc._id, folder },
-        });
+        LoggerService.critical(`Document(s) uploaded to folder - ${destinationFolderId}`, `${createdDocs.length} document(s) uploaded on ${new Date().toISOString()}`, req)
 
         res.status(201).json({
             success: true,
-            message: "New Document Uploaded",
-            data: doc,
+            message: "New Document(s) Uploaded",
+            data: createdDocs,
         });
     } catch (error) {
         res.status(500).json({
@@ -147,8 +165,8 @@ export const updateDocument = async (req: Request, res: Response) => {
 
         const updatedDoc = await DocModel.findByIdAndUpdate(
             id,
-            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?._id } },
-            { new: true, runValidators: true }
+            { $set: { ...updates, updatedAt: new Date(), updatedBy: req?.user?._id } },
+            { runValidators: true }
         );
 
         if (!updatedDoc) {
@@ -301,65 +319,64 @@ export const deleteDocument = async (req: Request, res: Response) => {
 };
 
 // PUT /api/documents/move-copy (move or copy documents)
-export const moveCopyDocuments = async (req: Request, res: Response) => {
+export const moveDocuments = async (req: Request, res: Response) => {
     try {
-        const operations = req.body
+        const { fileIds, destinationFolderId } = req.body
         // const operations = req.body as IDocMoveCopy[];
 
-        if (!Array.isArray(operations) || operations.length === 0) {
+        if (!Array.isArray(fileIds) || fileIds.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "No operations provided",
+                message: "No files provided",
             });
         }
 
         const results = [];
 
-        for (const op of operations) {
-            const { file, actionType, destinationFolder } = op;
+        for (const fId of fileIds) {
+            await DocModel.findByIdAndUpdate(fId, {
+                $set: {
+                    folder: destinationFolderId,
+                }
+            });
 
-            if (actionType === 'Move') {
-                await DocModel.findByIdAndUpdate(file._id, {
-                    $set: { folder: destinationFolder, updatedAt: new Date(), updatedBy: req.user?._id }
-                });
+            // Update folder associations
+            await FolderModel.updateMany(
+                { documents: fId },
+                { $pull: { documents: fId } }
+            );
 
-                // Update folder associations
-                await FolderModel.updateMany(
-                    { documents: file._id },
-                    { $pull: { documents: file._id } }
-                );
+            await FolderModel.findOneAndUpdate(
+                { name: destinationFolderId },
+                { $addToSet: { documents: fId } },
+                { upsert: true }
+            );
 
-                await FolderModel.findOneAndUpdate(
-                    { name: destinationFolder },
-                    { $addToSet: { documents: file._id } },
-                    { upsert: true }
-                );
+            results.push({ id: fId, destination: destinationFolderId });
 
-                results.push({ id: file._id, action: 'Moved', destination: destinationFolder });
-            }
-            else if (actionType === 'Copy') {
-                const { _id, ...docWithoutId } = file;
-                const newDoc = await DocModel.create({
-                    ...docWithoutId,
-                    folder: destinationFolder,
-                    createdAt: new Date(),
-                    createdBy: req.user?._id,
-                    copiedFrom: file._id,
-                });
+            // else if (actionType === 'Copy') {
+            //     const { _id, ...docWithoutId } = file;
+            //     const newDoc = await DocModel.create({
+            //         ...docWithoutId,
+            //         folder: destinationFolder,
+            //         createdAt: new Date(),
+            //         createdBy: req?.user?._id,
+            //         copiedFrom: file._id,
+            //     });
 
-                await FolderModel.findOneAndUpdate(
-                    { name: destinationFolder },
-                    { $addToSet: { documents: newDoc._id } },
-                    { upsert: true }
-                );
+            //     await FolderModel.findOneAndUpdate(
+            //         { name: destinationFolder },
+            //         { $addToSet: { documents: newDoc._id } },
+            //         { upsert: true }
+            //     );
 
-                results.push({ id: newDoc._id, action: 'Copied', destination: destinationFolder, sourceId: file._id });
-            }
+            //     results.push({ id: newDoc._id, action: 'Copied', destination: destinationFolder, sourceId: file._id });
+            // }
         }
 
         // Log action
         await logAction({
-            title: `Documents ${operations[0].actionType} operation`,
+            title: `Documents moved operation`,
             description: `${results.length} documents processed`,
             severity: ELogSeverity.INFO,
             meta: { operations: results },
@@ -367,7 +384,7 @@ export const moveCopyDocuments = async (req: Request, res: Response) => {
 
         res.status(200).json({
             success: true,
-            message: `${operations[0].actionType} operations completed`,
+            message: `${fileIds.length} moved`,
             data: results,
         });
     } catch (error) {
@@ -383,21 +400,20 @@ export const moveCopyDocuments = async (req: Request, res: Response) => {
 // GET /api/folders
 export const getFolders = async (req: Request, res: Response) => {
     try {
-        const folders = await FolderModel.find().lean();
+        const folders = await FolderModel.find()
+            .populate('documents')
+            .sort({ updatedAt: -1 })
+            .lean();
 
-        const totalDocs = await DocModel.countDocuments();
-
-        const metrics = {
-            totalDocs,
-            folders: folders.map(f => ({
+        const formatted =
+            folders.map(f => ({
                 ...f,
                 docsCount: f.documents?.length || 0,
             }))
-        };
 
         res.status(200).json({
             success: true,
-            data: metrics
+            data: formatted
         });
     } catch (error) {
         res.status(500).json({
@@ -408,11 +424,13 @@ export const getFolders = async (req: Request, res: Response) => {
 };
 
 // GET /api/folders/:name
-export const getFolderByName = async (req: Request, res: Response) => {
+export const getFolderById = async (req: Request, res: Response) => {
     try {
-        const { name } = req.params;
+        const { folderId } = req.params;
 
-        const folder = await FolderModel.findOne({ name }).lean();
+        const folder = await FolderModel.findById(folderId)
+            .populate('documents')
+            .lean();
 
         if (!folder) {
             return res.status(404).json({
@@ -420,6 +438,10 @@ export const getFolderByName = async (req: Request, res: Response) => {
                 message: "Folder not found",
             });
         }
+
+        const docs = await FolderModel.find(
+            { documents: folderId },
+        );
 
         res.status(200).json({
             success: true,
@@ -436,7 +458,7 @@ export const getFolderByName = async (req: Request, res: Response) => {
 // POST /api/folders
 export const createFolder = async (req: Request, res: Response) => {
     try {
-        const { name, description, parent } = req.body;
+        const { name, description, isDefault } = req.body;
 
         const existingFolder = await FolderModel.findOne({ name });
         if (existingFolder) {
@@ -449,10 +471,8 @@ export const createFolder = async (req: Request, res: Response) => {
         const folder = await FolderModel.create({
             name,
             description,
-            parent,
-            documents: [],
-            createdBy: req.user?._id,
-            createdAt: new Date(),
+            createdBy: req?.user?._id,
+            isDefault
         });
 
         res.status(201).json({
@@ -473,11 +493,20 @@ export const updateFolder = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const updates = req.body;
+        if (updates.name) {
+
+            const existingFolder = await FolderModel.findOne({ name: updates.name });
+            if (existingFolder) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Folder already exists",
+                });
+            }
+        }
 
         const folder = await FolderModel.findByIdAndUpdate(
             id,
-            { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user?._id } },
-            { new: true }
+            { $set: { ...updates, updatedAt: new Date(), updatedBy: req?.user?._id } },
         );
 
         if (!folder) {
@@ -542,28 +571,21 @@ export const deleteFolder = async (req: Request, res: Response) => {
 // GET /api/folders/:folder/documents
 export const getFolderDocuments = async (req: Request, res: Response) => {
     try {
-        const { folder } = req.params;
+        const { folderId } = req.params;
         const page = Number.parseInt(req.query.page as string || "1", 10);
         const limit = Number.parseInt(req.query.limit as string || "20", 10);
         const search = (req.query.doc_search as TSearchKey) || "";
 
         const skip = (page - 1) * limit;
-        const regex = new RegExp(search, "i");
 
         const query: any = {
-            folder: folder,
-            $or: [
-                { "name": regex },
-                { "original_filename": regex },
-                { "folder": regex },
-                { "description": regex },
-                { "tags": regex },
-            ],
+            folder: folderId,
         };
 
         const cleaned = removeEmptyKeys(query);
 
         const documents = await DocModel.find(cleaned)
+            .populate('folder',)
             .sort({ createdAt: 'desc' })
             .skip(skip)
             .limit(limit)
@@ -618,7 +640,7 @@ export const updateFolderById = async (req: Request, res: Response) => {
             $set: {
                 ...updateData,
                 updatedAt: new Date(),
-                updatedBy: req.user?._id,
+                updatedBy: req?.user?._id,
             },
         });
 
@@ -726,10 +748,10 @@ export const patchFolderById = async (req: Request, res: Response) => {
                 $set: {
                     ...updates,
                     updatedAt: new Date(),
-                    updatedBy: req.user?._id,
+                    updatedBy: req?.user?._id,
                 },
             },
-            { new: true, runValidators: true }
+            { runValidators: true }
         ).populate('documents');
 
         // Log the action
@@ -762,7 +784,7 @@ export const deleteFolderById = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         // Check authorization - only SUPER_ADMIN can delete folders
-        if (req.user?.role !== EUserRole.SUPER_ADMIN) {
+        if (req?.user?.role !== EUserRole.SUPER_ADMIN) {
             return res.status(403).json({
                 message: "Unauthorized. Only super admins can delete folders.",
                 success: false,
@@ -855,7 +877,7 @@ export const deleteMultipleFolders = async (req: Request, res: Response) => {
         }
 
         // Check authorization
-        if (req.user?.role !== EUserRole.SUPER_ADMIN) {
+        if (req?.user?.role !== EUserRole.SUPER_ADMIN) {
             return res.status(403).json({
                 message: "Unauthorized. Only super admins can delete folders.",
                 success: false,
