@@ -67,6 +67,7 @@ export const getHighlights = async (req: Request, res: Response) => {
     // Apply filters here
     const highlights = await HighlightModel.find(cleaned)
       .populate('match', 'homeTeam awayTeam date competition') // Populate match details
+      .populate('createdBy', 'name role')
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -99,6 +100,7 @@ export const getHighlightById = async (req: Request, res: Response) => {
 
     const highlight = await HighlightModel.findById(highlightId)
       .populate('match')
+      .populate('createdBy', 'name role')
       .lean();
 
     if (!highlight) {
@@ -130,6 +132,7 @@ export const getHighlightsByMatch = async (req: Request, res: Response) => {
 
     const highlights = await HighlightModel.find({ match: matchId })
       .populate('match')
+      .populate('createdBy', 'name role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -179,9 +182,7 @@ export const createHighlight = async (req: Request, res: Response) => {
       match,
       ...others,
        thumbnail_url: getOptimizedThumbnail(others?.public_id as string, { resourceType: others.resource_type as 'image' | 'video', width: 400, height: 225, crop: "fill" }),
-      createdBy: req.user?._id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdBy: req?.user
     });
 
     // Populate match details for response

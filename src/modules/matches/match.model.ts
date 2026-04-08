@@ -27,7 +27,8 @@ const matchSchema = new Schema(
     events: [{ description: String, title: String, minute: String, modeOfScore: String }],
     mvp: {},//iplayer preferred
     fixtureFlier: String,
-    resultFlier: String,
+    resultFlier: String, 
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true, toJSON: { virtuals: true, }, toObject: { virtuals: true } }
 );

@@ -31,6 +31,7 @@ const logSchema = new Schema(
     meta: { type: mongoose.Schema.Types.Mixed },
 
     url: String,
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   {
     timestamps: true,

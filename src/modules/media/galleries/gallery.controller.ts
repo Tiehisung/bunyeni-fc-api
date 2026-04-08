@@ -44,6 +44,7 @@ export const getGalleries = async (req: Request, res: Response) => {
         // Apply filters here
         const galleries = await GalleryModel.find(cleaned)
             .populate("files")
+            .populate('createdBy', 'name role')
             .sort({ updatedAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -76,6 +77,7 @@ export const getGalleryById = async (req: Request, res: Response) => {
 
         const gallery = await GalleryModel.findById(id)
             .populate("files")
+            .populate('createdBy', 'name role')
             .lean();
 
         if (!gallery) {
@@ -118,6 +120,7 @@ export const getGalleriesByTag = async (req: Request, res: Response) => {
 
         const galleries = await GalleryModel.find({ tags: tag })
             .populate("files")
+            .populate('createdBy', 'name role')
             .sort({ updatedAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -167,9 +170,7 @@ export const createGallery = async (req: Request, res: Response) => {
             title: title || "Untitled Gallery",
             description: description || "",
             timestamp: Date.now(),
-            // createdBy: req.user, // From auth middleware
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdBy: req?.user
         });
 
         // Populate files for response

@@ -15,7 +15,6 @@ import {
 import { authenticate, authorize } from "../../middleware/auth.middleware";
 import { EUserRole } from "../../types/user.interface";
 
-
 const router = Router();
 
 // Public routes - anyone can view staff information

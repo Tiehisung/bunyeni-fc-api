@@ -59,6 +59,7 @@ export const getSponsors = async (req: Request, res: Response) => {
       .populate({ path: "donations", populate: { path: "files" } })
       .populate("logo")
       .populate("badges")
+      .populate('createdBy', 'name role')
       .limit(limit)
       .skip(skip)
       .lean()
@@ -93,6 +94,7 @@ export const getSponsorById = async (req: Request, res: Response) => {
       .populate({ path: "donations", populate: { path: "files" } })
       .populate("logo")
       .populate("badges")
+      .populate('createdBy', 'name role')
       .lean();
 
     if (!sponsor) {
@@ -121,6 +123,7 @@ export const getTopSponsors = async (req: Request, res: Response) => {
 
     const sponsors = await SponsorModel.find({ isActive: true })
       .populate("logo")
+      .populate('createdBy', 'name role')
       .sort({ badge: -1, totalDonations: -1 })
       .limit(limit)
       .lean();
@@ -157,7 +160,8 @@ export const createSponsor = async (req: Request, res: Response) => {
     const created = await SponsorModel.create({
       ...sponsorData,
       badge: 0,
-      totalDonations: 0,
+      totalDonations: 0, 
+      createdBy: req?.user
     });
 
     if (!created) {

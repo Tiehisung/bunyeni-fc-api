@@ -199,8 +199,7 @@ export const createInjury = async (req: Request, res: Response) => {
             player,
             title: title || `${player.name} Injury`,
             status: status || 'active',
-            // createdBy: req.user?.id,
-            createdAt: new Date(),
+            createdBy: req?.user
         });
 
         if (!savedInjury) {

@@ -22,7 +22,7 @@ const gallerySchema = new Schema(
     // Probable associated owners
     tags: [String],//eg. objectIds, anything relevant to search
     type: { type: Schema.Types.String, enum: ['player', 'donation', 'general'], default: 'general' },
-    createdBy: {}
+    createdBy: { type: Schema.Types.ObjectId, ref: 'users', } //As IUser
   },
   { timestamps: true }
 );

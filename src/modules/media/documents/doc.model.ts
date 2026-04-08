@@ -3,7 +3,6 @@ import mongoose, { Schema } from "mongoose";
 
 export const docSchema = new mongoose.Schema(
     {
-        name: { type: String },
         original_filename: { type: String },
         description: { type: String },
         secure_url: { type: String },
@@ -19,6 +18,7 @@ export const docSchema = new mongoose.Schema(
         tags: { type: [String], default: () => [] },
         //Essential
         folder: { type: Schema.Types.ObjectId, ref: "folders", },
+        createdBy: { _id: String, name: String, avatar: String } //As IUser
     },
     { timestamps: true }
 );

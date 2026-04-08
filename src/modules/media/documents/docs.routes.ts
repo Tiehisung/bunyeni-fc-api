@@ -34,9 +34,9 @@ router.route("/")
 .post(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), createDocuments)
     .delete(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), deleteDocuments);
 
-router.post("/move", authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), moveDocuments);
+router.put("/move", authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), moveDocuments);
 
-router.route("/:id")
+router.route("/:docId")
     .put(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), updateDocument)
     .delete(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), deleteDocument);
 
@@ -44,10 +44,10 @@ router.route("/:id")
 router.route("/folders")
     .post(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), createFolder);
 
-router.route("/folders/:id")
+router.route("/folders/:folderId")
 .put(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH), updateFolder)
 .delete(authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN), deleteFolder);
 
-router.get("/:id", getDocumentById);
+router.get("/:docId", getDocumentById);
 
 export default router;

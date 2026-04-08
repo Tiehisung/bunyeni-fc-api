@@ -17,6 +17,7 @@ export const fileSchema = new mongoose.Schema(
     width: Number,
     height: Number,
     tags: { type: [String], default: () => [] }, //Can be used to store any tags associated with the file eg.'objectIds', 'profile-picture', 'gallery-image','video', etc.
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

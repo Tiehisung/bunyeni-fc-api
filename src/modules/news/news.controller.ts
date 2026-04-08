@@ -89,6 +89,7 @@ export const getNews = async (req: Request, res: Response) => {
 
     const news = await NewsModel.find(cleaned)
       .populate("comments.user", "name image")
+      .populate('createdBy', 'name role')
       .sort({ createdAt: "desc" })
       .skip(skip)
       .limit(limit)
@@ -121,6 +122,7 @@ export const getTrendingNews = async (req: Request, res: Response) => {
 
     const news = await NewsModel.find({ "stats.isTrending": true, isPublished: true })
       .populate("comments.user", "name image")
+      .populate('createdBy', 'name role')
       .sort({ "stats.viewCount": -1, createdAt: -1 })
       .limit(limit)
       .lean();
@@ -144,6 +146,7 @@ export const getLatestNews = async (req: Request, res: Response) => {
 
     const news = await NewsModel.find({ isPublished: true })
       .populate("comments.user", "name image")
+      .populate('createdBy', 'name role')
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
@@ -169,7 +172,9 @@ export const getNewsByCategory = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const news = await NewsModel.find({ category, isPublished: true })
-      .sort({ createdAt: -1 }).populate("comments.user", "name image")
+      .sort({ createdAt: -1 })
+      .populate('createdBy', 'name role')
+      .populate("comments.user", "name image")
       .skip(skip)
       .limit(limit)
       .lean();
@@ -202,6 +207,7 @@ export const getNewsBySlug = async (req: Request, res: Response) => {
 
     const news = await NewsModel.findOne(filter)
     .populate("comments.user", "name image")
+      .populate('createdBy', 'name role')
       .lean();
 
     if (!news) {
@@ -232,9 +238,7 @@ export const getNewsBySlug = async (req: Request, res: Response) => {
 export const createNews = async (req: Request, res: Response) => {
   try {
     const { headline, details, } = req.body as IPostNews;
-
-    console.log('body', req.body)
-
+ 
     // Generate slug from headline
     const slug = slugify(headline.text as string);
 
@@ -267,8 +271,7 @@ export const createNews = async (req: Request, res: Response) => {
         isLatest: true,
         hasVideo: !!headline?.hasVideo,
       },
-      // createdBy: req.user?.id,
-      createdAt: new Date(),
+      createdBy: req?.user
     });
 
     if (!published) {
@@ -417,9 +420,6 @@ export const togglePublishStatus = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 // DELETE /api/news/:slug
 export const deleteNews = async (req: Request, res: Response) => {
   try {
@@ -488,7 +488,9 @@ export const getNewsStats = async (req: Request, res: Response) => {
       .populate("comments.user", "name image")
       .populate("likes.user", "name image")
       .populate("views.user", "name image")
-      .populate("shares.user", "name image");
+      .populate("shares.user", "name image")
+      .populate('createdBy', 'name role')
+      ;
 
     if (!news) {
       return res.status(404).json({

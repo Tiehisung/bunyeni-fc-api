@@ -20,6 +20,7 @@ export const injurySchema = new Schema(
     status: { type: String, default: () => 'active' }, // active, recovered, long-term
     match: {},
     user: {},
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

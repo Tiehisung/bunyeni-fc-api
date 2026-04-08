@@ -56,6 +56,7 @@ export const getPlayers = async (req: Request, res: Response) => {
                 path: "galleries",
                 populate: { path: 'files' }
             })
+            .populate('createdBy', 'name role')
             .skip(skip)
             .limit(limit)
             .lean();
@@ -108,9 +109,7 @@ export const generatePlayerID = (
 export const createPlayer = async (req: Request, res: Response) => {
     try {
         const pf = req.body as IPostPlayer;
-
-        console.log(pf)
-
+ 
         // Ensure unique code ----------------------------------------
         let playerCode = generatePlayerID(pf.firstName, pf.lastName, pf.dob);
 
@@ -146,7 +145,7 @@ export const createPlayer = async (req: Request, res: Response) => {
             email,
             about,
             ageStatus,
-            // avatar: avatar?.path as string
+            createdBy: req?.user
         });
 
         // Create User
@@ -195,6 +194,7 @@ export const getPlayer = async (req: Request, res: Response) => {
             .populate('injuries')
             .populate('goals')
             .populate('assists')
+            .populate('createdBy', 'name role')
             .lean();
 
         if (!player) {

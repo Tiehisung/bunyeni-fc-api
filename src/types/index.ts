@@ -66,6 +66,18 @@ export interface IQueryRecords {
 
 }
 
+export interface IQueryParams extends IBaseQueryParams {
+  [k: string]: any
+}
+
+export interface IBaseQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string
+  role?: string,
+}
+
 export type TSearchKey =
   'search'
   | 'captain_search'

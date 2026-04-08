@@ -225,7 +225,7 @@ export const getTrainingSessionById = async (req: Request, res: Response) => {
 // POST /api/training
 export const createTrainingSession = async (req: Request, res: Response) => {
   try {
-    const { attendance, date, location, note, recordedBy } = req.body as IPostTrainingSession;
+    const { attendance, date, location, note,   } = req.body as IPostTrainingSession;
 
     // Validate required fields
     if (!date || !location) {
@@ -257,6 +257,7 @@ export const createTrainingSession = async (req: Request, res: Response) => {
       // recordedBy: recordedBy || req.user?.id,
       createdAt: new Date(),
       updateCount: 0,
+      createdBy:req?.user
     });
 
     if (!savedSession) {

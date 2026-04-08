@@ -45,7 +45,8 @@ const newsSchema = new Schema(
       default: 'unpublished', enum: ['published', 'unpublished', 'archived']
     },
     reporter: { email: String, name: String, image: String, role: String, about: String },
-    editors: [{ email: String, name: String, image: String, role: String, about: String, date: String }]
+    editors: [{ email: String, name: String, image: String, role: String, about: String, date: String }],
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

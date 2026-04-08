@@ -280,8 +280,7 @@ export const createMatch = async (req: Request, res: Response) => {
         const saved = await MatchModel.create({
             ...formdata,
             slug,
-            // createdBy: req.user?.id,
-            createdAt: new Date(),
+            createdBy: req?.user
         });
 
         // Log action

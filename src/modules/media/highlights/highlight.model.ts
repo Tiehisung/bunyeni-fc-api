@@ -1,5 +1,5 @@
 
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const highlightSchema = new mongoose.Schema(
   {
@@ -18,7 +18,8 @@ export const highlightSchema = new mongoose.Schema(
     width: Number,
     height: Number,
     tags: { type: [String], default: () => [] },//Can be used to store any tags associated with the file eg.'objectIds', 'profile-picture', 'gallery-image','video', etc.
-    match: {},
+    match: {}, 
+    createdBy: { type: Schema.Types.ObjectId, ref: 'users', } //As IUser
   },
   { timestamps: true }
 );

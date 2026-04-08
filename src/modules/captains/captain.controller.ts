@@ -252,6 +252,7 @@ export const assignCaptain = async (req: Request, res: Response) => {
             role,
             isActive: true,
             startDate: new Date(),
+             createdBy: req?.user
         });
 
 
@@ -311,7 +312,7 @@ export const assignMultipleCaptains = async (req: Request, res: Response) => {
                     player,
                     role,
                     isActive: true,
-
+                    createdBy: req?.user
                 });
 
                 results.push(newCaptain);

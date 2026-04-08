@@ -184,8 +184,7 @@ export const createGoal = async (req: Request, res: Response) => {
       assist,
       modeOfScore,
       teamId,
-      createdBy: req?.user?._id,
-      createdAt: new Date(),
+      createdBy: req?.user
     });
 
     if (!savedGoal) {

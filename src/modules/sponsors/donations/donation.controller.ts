@@ -46,6 +46,7 @@ export const getDonations = async (req: Request, res: Response) => {
     const donations = await DonationModel.find(cleaned)
       .populate({ path: "sponsor", select: "name businessName logo" })
       .populate("files")
+      .populate('createdBy', 'name role')
       .limit(limit)
       .skip(skip)
       .lean()
@@ -79,6 +80,7 @@ export const getDonationById = async (req: Request, res: Response) => {
     const donation = await DonationModel.findById(id)
       .populate("sponsor")
       .populate("files")
+      .populate('createdBy', 'name role')
       .lean();
 
     if (!donation) {
@@ -126,6 +128,7 @@ export const getDonationsBySponsor = async (req: Request, res: Response) => {
     const donations = await DonationModel.find(cleaned)
       .populate({ path: "sponsor" })
       .populate("files")
+      .populate('createdBy', 'name role')
       .limit(limit)
       .skip(skip)
       .lean()
@@ -172,7 +175,7 @@ export const createDonation = async (req: Request, res: Response) => {
       sponsor: sponsorId,
       value,
       category: category || 'general',
-      createdAt: new Date(),
+      createdBy: req?.user
     });
 
     // Update sponsor

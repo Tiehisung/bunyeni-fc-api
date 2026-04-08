@@ -236,7 +236,7 @@ export const createMvp = async (req: Request, res: Response) => {
             description,
             positionPlayed,
             season: season || existingMatch?.season,
-
+            createdBy: req?.user
         });
 
         if (!savedMVP) {
