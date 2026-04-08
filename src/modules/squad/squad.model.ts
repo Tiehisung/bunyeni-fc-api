@@ -26,7 +26,7 @@ export const squadSchema = new Schema({
     name: String,
     avatar: String,
   },
-
+  createdBy: { _id: String, name: String, avatar: String } //As IUser
 },
   { timestamps: true });
 

@@ -14,8 +14,9 @@ const captainSchema = new mongoose.Schema(
       name: String,
       avatar: String,
       number: Number
-},
-    isActive: { type: Boolean, default: true },
+    },
+    isActive: { type: Boolean, default: true }
+    , createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

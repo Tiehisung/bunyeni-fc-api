@@ -15,7 +15,8 @@ export const mvpSchema = new Schema(
     match: {},
     description: String,
     positionPlayed: String,
-    season:String
+    season: String,
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
 
   { timestamps: true }

@@ -10,6 +10,7 @@ const teamSchema = new Schema(
     logo: String,
     isHome: Boolean,
     players: [{ name: String, number: String, avatar: String, },],
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

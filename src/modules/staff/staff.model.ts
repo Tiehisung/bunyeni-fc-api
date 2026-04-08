@@ -33,7 +33,8 @@ const staffSchema = new Schema(
             type: String,
             required: true,
         },
-        isActive: { type: Boolean, default: true },
+        isActive: { type: Boolean, default: true }, 
+        createdBy: { _id: String, name: String, avatar: String } //As IUser
     },
     { timestamps: true }
 );

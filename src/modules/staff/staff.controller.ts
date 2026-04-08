@@ -1,7 +1,6 @@
 // controllers/staffMember.controller.ts
 import type { Request, Response } from "express";
-
-import { QueryFilter } from "mongoose";
+ 
 import { removeEmptyKeys, getErrorMessage } from "../../lib";
 import { formatDate } from "../../lib/timeAndDate";
 import { EArchivesCollection } from "../../types/archive.interface";
@@ -238,8 +237,7 @@ export const createStaff = async (req: Request, res: Response) => {
       startDate: startDate || new Date(),
       contractType: contractType || 'permanent',
       isActive: true,
-      // createdBy: req.user?.id,
-      createdAt: new Date(),
+      createdBy: req?.user
     });
 
     if (!saved) {

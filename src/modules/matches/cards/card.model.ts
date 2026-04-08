@@ -18,7 +18,7 @@ export const cardSchema = new Schema(
     match: {},
 
     type: { type: String, enum: Object.values(ECardType), default: ECardType.YELLOW},
-
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

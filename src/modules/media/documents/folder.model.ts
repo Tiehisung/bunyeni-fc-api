@@ -1,8 +1,9 @@
 
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const docFolderSchema = new mongoose.Schema(
     {
+        // slug: { type: String, required: true, unique: [true, 'Slug must be unique'] },
         name: {
             type: String,
             required: [true, 'You must provide a folder name'],
@@ -17,6 +18,7 @@ export const docFolderSchema = new mongoose.Schema(
             type: [mongoose.Schema.Types.ObjectId],
             ref: "documents", default: () => []
         },
+        createdBy: { _id: String, name: String, avatar: String } //As IUser
     },
 
     { timestamps: true }

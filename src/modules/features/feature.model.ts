@@ -8,7 +8,7 @@ export const featureSchema = new Schema({
       label: { type: String, unique: true ,trim:true},
       value: { type: String, lowercase: true, trim: true, unique: true }
     }
-  ]
+  ], createdBy: { type: Schema.Types.ObjectId, ref: 'users', } //As IUser
 },
   { timestamps: true });
 

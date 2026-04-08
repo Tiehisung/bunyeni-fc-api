@@ -24,6 +24,7 @@ const TrainingSessionSchema = new Schema({
     },
     updateCount: { type: Number, default: 0 },
     recordedBy: {},
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
 }, { timestamps: true, });
 
 const TrainingSessionModel = models.training_session ||

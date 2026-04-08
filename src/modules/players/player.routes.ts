@@ -10,11 +10,9 @@ import {
 } from "../../modules/players/player.controller";
 import { authenticate, authorize } from "../../middleware/auth.middleware";
 import { EUserRole } from "../../types/user.interface";
-
-
+ 
 const router = Router();
-
-
+ 
 router.route('/')
     .get(getPlayers)// Public route
     .post(authenticate, authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN, EUserRole.COACH,), createPlayer);;

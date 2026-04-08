@@ -71,7 +71,7 @@ const playerSchema = new Schema(
         },
         training: { type: Schema.Types.Mixed, default: () => ({ team: "A" }) },
         code: { type: String, required: [true, 'Player ID is required'], unique: [true, 'Player ID must be a unique value'] },//IS091223
-
+        createdBy: { _id: String, name: String, avatar: String } //As IUser
     },
     { timestamps: true }
 );

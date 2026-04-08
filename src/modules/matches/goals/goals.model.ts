@@ -26,7 +26,8 @@ export const goalSchema = new Schema(
     type: String,
     description: String,
     modeOfScore: { type: String, default: () => EGoalType.UNKNOWN, enum: Object.values(EGoalType) },
-    teamId: { type: Schema.Types.ObjectId, ref: "teams" }
+    teamId: { type: Schema.Types.ObjectId, ref: "teams" },
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

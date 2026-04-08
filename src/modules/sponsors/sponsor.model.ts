@@ -21,7 +21,8 @@ const sponsorSchema = new Schema(
         ref: "donations",
       },
     ],
-    badges: { type: Number, default: () => 0 },
+    badges: { type: Number, default: () => 0 }, 
+    createdBy: { _id: String, name: String, avatar: String } //As IUser
   },
   { timestamps: true }
 );

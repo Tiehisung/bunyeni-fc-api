@@ -14,7 +14,7 @@ import "../media/files/file.model";
 // GET /api/teams
 export const getTeams = async (req: Request, res: Response) => {
     try {
-        console.log(req?.user)
+
         const page = Number.parseInt(req.query.page as string || "1", 10);
         const limit = Number.parseInt(req.query.limit as string || "10", 10);
         const skip = (page - 1) * limit;
@@ -73,7 +73,7 @@ export const getTeams = async (req: Request, res: Response) => {
                 limit,
                 total,
                 pages: Math.ceil(total / limit),
-            }, 
+            },
             // user: req?.user
         });
     } catch (error) {
@@ -90,9 +90,8 @@ export const getTeamById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const team = await TeamModel.findById(id).lean();
-
-
+        const team = await TeamModel.findById(id)
+            .lean();
 
         if (!team) {
             return res.status(404).json({
@@ -190,8 +189,6 @@ export const createTeam = async (req: Request, res: Response) => {
     try {
         const teamData: IPostTeam = req.body;
 
-        console.log(teamData)
-
         // Check if team with same name and season already exists
         const existingTeam = await TeamModel.findOne({
             name: teamData.name,
@@ -209,8 +206,7 @@ export const createTeam = async (req: Request, res: Response) => {
         // Create team
         const createdTeam = await TeamModel.create({
             ...teamData,
-            // createdBy: req.user?.id,
-            createdAt: new Date(),
+            createdBy: req?.user
         });
 
         if (!createdTeam) {

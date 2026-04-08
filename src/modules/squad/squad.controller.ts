@@ -175,6 +175,7 @@ export const createSquad = async (req: Request, res: Response) => {
             title: matchDetails.title,
             match: match._id || match,
             season: matchDetails.season,
+             createdBy: req?.user
         });
 
         if (!savedSquad) {

@@ -10,7 +10,7 @@ import {
     cleanupOldLogs,
     deleteLog,
 } from "./logs.controller";
-import { authenticate, authorize } from "../../middleware/auth.middleware";
+import {   authorize } from "../../middleware/auth.middleware";
 import { EUserRole } from "../../types/user.interface";
 
 const router = Router();

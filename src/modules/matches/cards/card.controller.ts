@@ -209,7 +209,7 @@ export const createCard = async (req: Request, res: Response) => {
             player,
             type,
             description: description,
-            // createdBy: req.user?.id,
+            createdBy: req?.user
         });
 
         if (!savedCard) {
