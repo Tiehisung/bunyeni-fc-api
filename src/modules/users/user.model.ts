@@ -6,6 +6,7 @@ export type UserRole = "player" | "coach" | "admin";
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
+    avatar: String,
     email: {
         type: String,
         required: [true, 'Email is required'],
