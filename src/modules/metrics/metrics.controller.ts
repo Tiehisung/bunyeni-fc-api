@@ -252,17 +252,10 @@ export const getPlayerMetrics = async (req: Request, res: Response) => {
 };
 
 // GET /api/metrics/overview
-export const getOverviewMetrics = async (req: Request, res: Response) => {
+export const getPlayersOverviewMetrics = async (req: Request, res: Response) => {
     try {
-        const matches = await MatchModel.find({ status: 'FT' })
-            .populate('opponent')
-            .populate('goals') as IMatch[];
 
-        const matchStats = {
-            wins: matches.filter(m => m.computed?.result === 'win'),
-            draws: matches.filter(m => m.computed?.result === 'draw'),
-            losses: matches.filter(m => m.computed?.result === 'loss'),
-        };
+
 
         const playerStats = await PlayerModel.aggregate([
             {
@@ -325,21 +318,11 @@ export const getOverviewMetrics = async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             data: {
-                matches: {
-                    total: matches.length,
-                    wins: matchStats.wins.length,
-                    draws: matchStats.draws.length,
-                    losses: matchStats.losses.length,
-                    winRate: matches.length > 0
-                        ? ((matchStats.wins.length / matches.length) * 100).toPrecision(3) + '%'
-                        : '0%',
-                },
-                players: {
-                    total: playerStats[0]?.totalPlayers[0]?.count || 0,
-                    byPosition: playerStats[0]?.byPosition || [],
-                    topScorers: playerStats[0]?.topScorers || [],
-                    topAssists: playerStats[0]?.topAssists || [],
-                },
+                total: playerStats[0]?.totalPlayers[0]?.count || 0,
+                byPosition: (playerStats[0]?.byPosition || []),
+                topScorers: playerStats[0]?.topScorers || [],
+                topAssists: playerStats[0]?.topAssists || [],
+
             },
         });
     } catch (error) {
