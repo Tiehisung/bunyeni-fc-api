@@ -42,7 +42,7 @@ export const getOptimizedThumbnail = (publicId: string, options: IThumbnailOptio
             height,
             crop,
             quality: 'auto',
-             format: 'jpg'
+            format: 'jpg'
         });
     }
 
@@ -51,16 +51,18 @@ export const getOptimizedThumbnail = (publicId: string, options: IThumbnailOptio
         width,
         height,
         crop,
-        quality: 'auto', format: 'jpg'
+        quality: 'auto', 
+        format: 'jpg'
     });
 };
 
-export const getThumbnailUrl = (publicId: string, width = 200, height = 200) => {
+export const getThumbnailUrl = (publicId: string, width = 400, height = 320) => {
     return cloudinary.url(publicId, {
         width,
         height,
         crop: 'fill',
-        quality: 'auto', format: 'jpg'
+        quality: 'auto',
+        format: 'jpg'
     });
 };
 

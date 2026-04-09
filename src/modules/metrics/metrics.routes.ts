@@ -6,7 +6,7 @@ import {
   getSeasonMetrics,
   getHeadToHeadMetrics,
   getPlayerMetrics,
-  getOverviewMetrics,
+  getPlayersOverviewMetrics,
   getMetricTrends,
 } from "./metrics.controller";
 import { getErrorMessage } from "../../lib";
@@ -17,7 +17,7 @@ const router = Router();
 
 // Most metrics are public - used for displaying stats on the website
 router.get("/dashboard", getDashboardMetrics);
-router.get("/overview", getOverviewMetrics);
+router.get("/players/overview", getPlayersOverviewMetrics);
 router.get("/trends", getMetricTrends);
 router.get("/season/:season", getSeasonMetrics);
 router.get("/head-to-head/:opponentId", getHeadToHeadMetrics);
@@ -35,7 +35,7 @@ router.get(
       // This would be a more detailed analytics endpoint
       const [dashboard, overview, trends] = await Promise.all([
         getDashboardMetrics(req, res),
-        getOverviewMetrics(req, res),
+        getPlayersOverviewMetrics(req, res),
         getMetricTrends(req, res),
       ]);
 
