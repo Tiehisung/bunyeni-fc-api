@@ -72,7 +72,7 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-export const nextSignin = async (req: Request, res: Response) => {
+export const signin = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
@@ -131,82 +131,7 @@ export const nextSignin = async (req: Request, res: Response) => {
         });
     }
 };
-export const login = async (req: Request, res: Response) => {
-    try {
-        const { email, password } = req.body;
-
-        // Find user with password
-        const user = await UserModel.findOne({ email }).select('+password');
-
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Check if user is active
-        if (!user.isActive) {
-            return res.status(401).json({
-                success: false,
-                message: 'Account is deactivated. Please contact admin.'
-            });
-        }
-
-        // Verify password
-        const isPasswordValid = await user.comparePassword(password);
-        if (!isPasswordValid) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Update last login
-        user.lastLogin = new Date();
-
-        // Generate tokens
-        const { accessToken, refreshToken } = generateJwtTokens({
-            _id: user._id.toString(),
-            email: user.email,
-            role: user.role
-        });
-
-        // Save refresh token
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false });
-
-        // Set cookies
-        res.cookie('accessToken', accessToken, {
-            ...cookieOptions,
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        });
-
-        res.cookie('refreshToken', refreshToken, cookieOptions);
-
-        // Return user without password
-        const userResponse = user.toObject();
-        delete (userResponse as any).password;
-        delete (userResponse as any).refreshToken;
-
-        res.json({
-            success: true,
-            message: 'Login successful',
-            data: {
-                user: userResponse,
-                accessToken,
-                refreshToken
-            }
-        });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Login failed',
-            data: error
-        });
-    }
-};
+ 
 
 export const refreshToken = async (req: Request, res: Response) => {
     try {
