@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Tiehisung/bunyeni-fc-api#readme",
   "dependencies": {
+    "@auth/express": "^0.12.1",
     "@vercel/og": "^0.11.1",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",

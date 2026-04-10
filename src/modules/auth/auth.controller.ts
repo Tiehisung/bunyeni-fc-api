@@ -72,6 +72,65 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
+export const nextSignin = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+
+        // Find user with password
+        const user = await UserModel.findOne({ email }).select('+password');
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password'
+            });
+        }
+
+        // Check if user is active
+        if (!user.isActive) {
+            return res.status(401).json({
+                success: false,
+                message: 'Account is deactivated. Please contact admin.'
+            });
+        }
+
+        // Verify password
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password'
+            });
+        }
+        // Update last login
+        user.lastLogin = new Date();
+
+        await user.save({ validateBeforeSave: false });
+
+        const safeUser = {
+            name:user.name,
+            avatar:user.avatar,
+            role:user.role,
+            email:user.email,
+            id: user._id,
+        };
+       
+        res.json({
+            success: true,
+            message: 'Login successful',
+            data: {
+                user: safeUser,
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Login failed',
+            data: error
+        });
+    }
+};
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
@@ -143,8 +202,8 @@ export const login = async (req: Request, res: Response) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Login failed', 
-            data:error
+            message: 'Login failed',
+            data: error
         });
     }
 };

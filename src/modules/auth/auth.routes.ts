@@ -2,7 +2,9 @@
 import { Router } from 'express';
 
 import { authenticate, authorize } from '../../middleware/auth.middleware';
-import { login, logout, getMe, changePassword, register, refreshToken } from './auth.controller';
+import { nextSignin, login, logout, getMe, changePassword, register, refreshToken 
+    
+} from './auth.controller';
 import { EUserRole } from '../../types/user.interface';
 
 const router = Router();
@@ -10,6 +12,7 @@ const router = Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/signin', nextSignin);
 router.post('/refresh-token', refreshToken);
 
 // Protected routes
